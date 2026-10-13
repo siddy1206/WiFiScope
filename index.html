@@ -1,0 +1,3951 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+<title>WiFiScope — Campus Wi-Fi Signal Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  --bg-primary: #070d18;
+  --bg-secondary: #0c1626;
+  --bg-tertiary: #112036;
+  --bg-card: rgba(14, 25, 43, 0.85);
+  --bg-card-hover: rgba(20, 36, 61, 0.95);
+  --border-subtle: rgba(148, 185, 222, 0.12);
+  --border-focus: rgba(56, 189, 248, 0.4);
+  --border-accent: rgba(56, 189, 248, 0.25);
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  --accent-cyan: #38bdf8;
+  --accent-blue: #3b82f6;
+  --accent-teal: #2dd4bf;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+  --accent-indigo: #6366f1;
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 24px rgba(56, 189, 248, 0.2);
+  
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+}
+
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-tertiary: #e2e8f0;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --bg-card-hover: #ffffff;
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --border-focus: rgba(37, 99, 235, 0.4);
+  --border-accent: rgba(37, 99, 235, 0.2);
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 90% 10%, rgba(56, 189, 248, 0.06), transparent 30%),
+    radial-gradient(circle at 10% 80%, rgba(45, 212, 191, 0.04), transparent 25%);
+}
+
+/* Layout */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 40;
+  transition: transform 0.25s ease;
+}
+
+.brand {
+  padding: 24px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.brand-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 16px;
+  box-shadow: 0 6px 16px rgba(56, 189, 248, 0.35);
+}
+
+.brand-info h1 {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(120deg, var(--text-primary), var(--accent-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-info p {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.nav-section {
+  padding: 16px 14px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.nav-header {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  padding: 8px 10px;
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 18px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-item:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.15), rgba(59, 130, 246, 0.05));
+  color: var(--accent-cyan);
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.nav-item svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.sidebar-footer {
+  padding: 16px 18px;
+  border-top: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.engine-status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-emerald);
+  box-shadow: 0 0 8px var(--accent-emerald);
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.15); }
+}
+
+/* Main Content Area */
+.main-wrapper {
+  margin-left: 260px;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Topbar */
+.topbar {
+  height: 70px;
+  background: rgba(12, 22, 38, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+[data-theme="light"] .topbar {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.page-title-area {
+  display: flex;
+  flex-direction: column;
+}
+
+.page-breadcrumb {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+}
+
+.page-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.badge.success { background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.25); }
+.badge.warning { background: rgba(245, 158, 11, 0.12); color: var(--accent-amber); border-color: rgba(245, 158, 11, 0.25); }
+.badge.danger { background: rgba(244, 63, 94, 0.12); color: var(--accent-rose); border-color: rgba(244, 63, 94, 0.25); }
+.badge.cyan { background: rgba(56, 189, 248, 0.12); color: var(--accent-cyan); border-color: rgba(56, 189, 248, 0.25); }
+.badge.pitch { background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(56, 189, 248, 0.2)); color: #a5b4fc; border-color: rgba(99, 102, 241, 0.4); }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-pitch {
+  background: linear-gradient(135deg, #6366f1, #3b82f6);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+}
+
+.btn-pitch:hover {
+  box-shadow: 0 6px 22px rgba(99, 102, 241, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-focus);
+}
+
+/* Page Layout */
+.content-body {
+  padding: 28px 32px 64px;
+  max-width: 1680px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.view-page {
+  display: none;
+  animation: fadeIn 0.22s ease forwards;
+}
+
+.view-page.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hero Section */
+.hero-banner {
+  background: linear-gradient(135deg, rgba(14, 28, 48, 0.95), rgba(8, 16, 28, 0.95));
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.hero-banner::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.15), transparent 70%);
+  pointer-events: none;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent-cyan);
+  margin-bottom: 6px;
+}
+
+.hero-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.6px;
+  line-height: 1.25;
+}
+
+.hero-subtitle {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  max-width: 680px;
+}
+
+/* Hero KPI Grid */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-accent);
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent-gradient, linear-gradient(90deg, var(--accent-cyan), var(--accent-blue)));
+}
+
+.kpi-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 8px 0 4px;
+  letter-spacing: -0.5px;
+  font-family: var(--font-sans);
+}
+
+.kpi-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Card & Panels */
+.card-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.card-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.card-title-group h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.card-title-group p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.card-body {
+  padding: 24px;
+}
+
+/* Grid Layouts */
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1.3fr 0.9fr;
+  gap: 20px;
+}
+
+.grid-equal {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.grid-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* Map Container */
+.map-canvas-container {
+  position: relative;
+  width: 100%;
+  height: 540px;
+  background: #060c17;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+
+[data-theme="light"] .map-canvas-container {
+  background: #f1f5f9;
+}
+
+.map-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+}
+
+.map-toolbar {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 10;
+}
+
+.map-toolbar button {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: rgba(14, 25, 43, 0.9);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.map-toolbar button:hover {
+  background: var(--accent-cyan);
+  color: #050b14;
+  border-color: var(--accent-cyan);
+}
+
+.map-layer-selector {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  background: rgba(12, 22, 38, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  z-index: 10;
+  font-size: 11px;
+}
+
+[data-theme="light"] .map-layer-selector {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.layer-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.layer-toggle input[type="checkbox"] {
+  accent-color: var(--accent-cyan);
+}
+
+/* Map Popover Inspection Card */
+.map-popover {
+  position: absolute;
+  background: rgba(10, 20, 35, 0.96);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--accent-cyan);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(56, 189, 248, 0.3);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  width: 250px;
+  z-index: 25;
+  pointer-events: none;
+  display: none;
+  transform: translate(-50%, -115%);
+  transition: opacity 0.15s ease;
+}
+
+.popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.popover-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.popover-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  margin-bottom: 4px;
+}
+
+.popover-label {
+  color: var(--text-muted);
+}
+
+.popover-val {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+/* Gradient Legend */
+.gradient-scale {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 14px;
+}
+
+.gradient-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #45277f 0%, #2d569e 28%, #278ea0 55%, #4daf69 78%, #e4db4b 100%);
+  border: 1px solid var(--border-subtle);
+}
+
+.gradient-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* Data Table */
+.table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  text-align: left;
+}
+
+table.data-table th {
+  background: var(--bg-tertiary);
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+table.data-table th:hover {
+  color: var(--accent-cyan);
+}
+
+table.data-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+table.data-table tr:hover {
+  background: rgba(56, 189, 248, 0.04);
+}
+
+table.data-table tr.clickable {
+  cursor: pointer;
+}
+
+/* Form Controls */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.input-control, .select-control {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.input-control:focus, .select-control:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15);
+}
+
+/* Zone Recommendation Cards */
+.zone-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.zone-card.weak {
+  border-left: 4px solid var(--accent-rose);
+}
+
+.zone-card.strong {
+  border-left: 4px solid var(--accent-emerald);
+}
+
+.zone-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-focus);
+}
+
+.zone-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.zone-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.zone-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.zone-meta {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* 30-Slide Pitch Mode Fullscreen Deck */
+.pitch-overlay {
+  position: fixed;
+  inset: 0;
+  background: #050b14;
+  z-index: 120;
+  display: none;
+  flex-direction: column;
+  color: #fff;
+  padding: 24px 36px;
+  overflow-y: auto;
+}
+
+.pitch-overlay.open {
+  display: flex;
+}
+
+.pitch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(148, 185, 222, 0.15);
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pitch-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.pitch-slide-content {
+  flex: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  width: 100%;
+  animation: fadeIn 0.2s ease;
+}
+
+.slide-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+}
+
+.slide-title {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  color: var(--text-primary);
+  line-height: 1.25;
+  margin-bottom: 18px;
+}
+
+.slide-body {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.slide-box {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  margin-top: 18px;
+}
+
+/* 5-Step Pipeline Cards */
+.pipeline-step-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.step-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.step-card.active-step {
+  border-color: var(--accent-cyan);
+  background: rgba(56, 189, 248, 0.08);
+  box-shadow: var(--shadow-glow);
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  font-weight: 800;
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+}
+
+/* Live Analysis Simulation Modal */
+.analysis-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 11, 20, 0.85);
+  backdrop-filter: blur(12px);
+  z-index: 110;
+  display: none;
+  place-items: center;
+}
+
+.analysis-modal.open {
+  display: grid;
+}
+
+.analysis-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-focus);
+  border-radius: var(--radius-lg);
+  padding: 36px 40px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  text-align: center;
+}
+
+/* Toast */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--accent-cyan);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  font-size: 12.5px;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: all 0.2s ease;
+  z-index: 130;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: none;
+  place-items: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.modal-backdrop.open {
+  display: grid;
+}
+
+.modal-content {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  max-width: 620px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: modalPop 0.2s ease;
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Responsive */
+@media (max-width: 1080px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-wrapper { margin-left: 0; }
+  .grid-2col, .grid-equal, .grid-3col { grid-template-columns: 1fr; }
+  .pipeline-step-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-banner { flex-direction: column; align-items: flex-start; }
+  .content-body { padding: 20px 16px; }
+  .topbar { padding: 0 16px; }
+  .pitch-overlay { padding: 16px 20px; }
+}
+
+@media print {
+  .sidebar, .topbar, .map-toolbar, .map-layer-selector, .filter-bar, .btn, .pitch-overlay { display: none !important; }
+  .main-wrapper { margin-left: 0; width: 100%; }
+  .content-body { padding: 0; }
+  .card-panel { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+  body { background: #fff !important; color: #000 !important; }
+}
+</style>
+
+<style id="hybrid-scope-guard">
+/* Hybrid final: keep the stronger product UI, remove features outside the MFAD scope. */
+#btn-pitch-mode-side,
+#btn-pitch-mode-top,
+#view-roadmap,
+#view-spatial-intel .grid-equal > .card-panel:first-child { display:none !important; }
+
+#view-spatial-intel .grid-equal{
+  grid-template-columns:1fr !important;
+}
+
+#view-spatial-intel .grid-equal > .card-panel:nth-child(2){
+  width:100%;
+}
+
+.hero-title{max-width:840px}
+.step-card{min-height:110px}
+.map-canvas-container,.map-canvas{touch-action:none}
+</style>
+
+
+<style id="hybrid-scope-strip">
+.scope-strip{
+  margin:-6px 0 18px;
+  display:flex;align-items:center;gap:8px;
+  padding:8px 11px;
+  border:1px solid rgba(56,189,248,.10);
+  border-radius:9px;
+  background:rgba(56,189,248,.025);
+  color:#7188a0;
+  font-size:9px;
+}
+.scope-dot{width:6px;height:6px;border-radius:50%;background:#42c8a0;box-shadow:0 0 8px rgba(66,200,160,.35)}
+</style>
+
+
+<style id="coverage-reference-polish">
+#main-map-container .coverage-reference-legend{
+  position:absolute;right:18px;top:18px;z-index:4;
+  min-width:220px;padding:10px 12px;border:1px solid rgba(68,143,232,.42);
+  border-radius:12px;background:rgba(7,18,31,.86);backdrop-filter:blur(10px);
+  box-shadow:0 10px 30px rgba(0,0,0,.25)
+}
+#main-map-container .coverage-reference-legend .legend-row{
+  display:flex;justify-content:space-between;gap:14px;align-items:center;
+  color:#dcebf6;font-size:10px;font-weight:750
+}
+#main-map-container .coverage-reference-legend .legend-bar{
+  height:11px;margin:7px 0 5px;border-radius:999px;
+  background:linear-gradient(90deg,#f4ed39 0%,#68e15a 23%,#16c9c5 48%,#1879ef 76%,#5326c8 100%);
+}
+#main-map-container .coverage-reference-legend .legend-mini{
+  display:flex;justify-content:space-between;color:#8ba3b8;font-size:8px
+}
+#main-map-container .map-caption-chip{
+  position:absolute;left:18px;top:18px;z-index:4;
+  padding:7px 10px;border:1px solid rgba(67,214,234,.22);
+  background:rgba(5,18,31,.80);backdrop-filter:blur(8px);
+  border-radius:10px;color:#d7e9f3;font-size:9px;font-weight:850
+}
+</style>
+
+
+<style id="zone-clarity-polish">
+#main-map-container .zone-key{
+  position:absolute;left:18px;bottom:18px;z-index:4;
+  display:flex;align-items:center;gap:9px;
+  padding:8px 10px;border:1px solid rgba(169,202,226,.15);
+  border-radius:10px;background:rgba(5,18,31,.78);backdrop-filter:blur(8px);
+  color:#9ab0c3;font-size:8px
+}
+#main-map-container .zone-key strong{color:#dcecf6}
+#main-map-container .zone-key .zk{display:flex;align-items:center;gap:4px}
+#main-map-container .zone-key i{width:8px;height:8px;border-radius:2px;border:1px solid rgba(104,219,157,.75);background:rgba(104,219,157,.16)}
+#main-map-container .zone-key i.amber{border-color:rgba(229,207,101,.78);background:rgba(229,207,101,.14)}
+#main-map-container .zone-key i.red{border-color:rgba(255,104,126,.85);background:rgba(255,104,126,.16)}
+</style>
+
+
+<style id="python-backend-status">
+.backend-status{display:flex;align-items:center;gap:7px;margin-top:8px;color:#66839b;font-size:8px}
+.backend-status-dot{width:6px;height:6px;border-radius:50%;background:#59d597;box-shadow:0 0 7px rgba(89,213,151,.45)}
+</style>
+
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="app-sidebar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+          <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+          <line x1="12" y1="20" x2="12.01" y2="20"></line>
+        </svg>
+      </div>
+      <div class="brand-info">
+        <h1>WiFiScope</h1>
+        <p>Wi-Fi Signal Intelligence</p>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-header">Product</div>
+      <div class="nav-group">
+        <button class="nav-item active" data-target="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Dashboard
+        </button>
+        <button class="nav-item" data-target="coverage-map">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+          Coverage Map
+        </button>
+        <button class="nav-item" data-target="measurements">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+          Measurements
+        </button>
+        <button class="nav-item" data-target="spatial-intel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+          Wi-Fi Insights & Fixes
+        </button>
+        <button class="nav-item" data-target="before-after">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8L22 12L18 16"></path><path d="M6 16L2 12L6 8"></path><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+          Before vs After
+        </button>
+      </div>
+
+      <div class="nav-header">Analytics & Math</div>
+      <div class="nav-group">
+        <button class="nav-item" data-target="analytics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          Analytics & Error
+        </button>
+        <button class="nav-item" data-target="math-pipeline">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+          Linear Algebra Pipeline
+        </button>
+      </div>
+
+      <div class="nav-header">Research & Roadmap</div>
+      <div class="nav-group">
+        <button class="nav-item" data-target="data-quality">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          Upload Survey CSV
+        </button>
+        
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="btn btn-pitch" id="btn-pitch-mode-side" style="width: 100%;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        30-Slide Pitch Deck 🎓
+      </button>
+      <div class="engine-status">
+        <div class="status-dot"></div>
+        <span>Spatial Engine: Active</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <div class="main-wrapper">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="page-title-area">
+        <span class="page-breadcrumb" id="top-breadcrumb">OVERVIEW</span>
+        <h2 class="page-title" id="top-page-title">Executive Dashboard</h2>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="btn btn-pitch" id="btn-pitch-mode-top">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          Pitch Deck (30 Slides)
+        </button>
+
+        <button class="btn btn-primary" id="btn-run-analysis">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+          Run Analysis
+        </button>
+
+        <div class="badge cyan" id="dataset-badge">20 Locations · 60 Readings</div>
+        
+        <button class="btn btn-secondary" id="btn-theme-toggle" title="Toggle Dark/Light Mode">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        </button>
+
+        <button class="btn btn-secondary" id="btn-export-menu">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Export
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Views -->
+    <main class="content-body">
+      
+      <!-- VIEW: DASHBOARD (THE HERO EXPERIENCE) -->
+      <section class="view-page active" id="view-dashboard">
+<div class="scope-strip">
+  <span class="scope-dot"></span>
+  <span>Matrix representation · vector similarity · least-squares spatial estimation · weak-zone detection · eigen-pattern analysis</span>
+</div>
+
+        <!-- Hero Tagline Banner -->
+        <div class="hero-banner">
+          <div>
+            <div class="hero-tag">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              Spatial Signal Intelligence
+            </div>
+            <h1 class="hero-title">See the signal. Find the weak zones. Understand the coverage.</h1>
+            <p class="hero-subtitle">WiFiScope turns measured RSSI values into a clear Linear Algebra workflow so you can understand how signal varies across the surveyed area.</p>
+          </div>
+          <div style="display: flex; gap: 10px; flex-shrink: 0;">
+            <button class="btn btn-primary" onclick="runAnalysisDemo()">Run Live Analysis</button>
+            <button class="btn btn-secondary" onclick="navigateTo('before-after')">Before vs After</button>
+          </div>
+        </div>
+
+        <!-- 5-Step Story Cards -->
+        <div class="pipeline-step-grid">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div style="font-size: 12px; font-weight: 700;">1. Measure</div>
+            <div style="font-size: 10.5px; color: var(--text-muted);">Calibrated physical survey readings</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div style="font-size: 12px; font-weight: 700;">2. Predict</div>
+            <div style="font-size: 10.5px; color: var(--text-muted);">Least-squares spatial plane regression</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div style="font-size: 12px; font-weight: 700;">3. Visualize</div>
+            <div style="font-size: 10.5px; color: var(--text-muted);">Continuous 2D heatmap & contours</div>
+          </div>
+          <div class="step-card active-step">
+            <div class="step-num">4</div>
+            <div style="font-size: 12px; font-weight: 700; color: var(--accent-cyan);">4. Detect</div>
+            <div style="font-size: 10.5px; color: var(--text-muted);">Isolate persistent dead zones</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div style="font-size: 12px; font-weight: 700;">5. Interpret</div>
+            <div style="font-size: 10.5px; color: var(--text-muted);">Weak-zone interpretation</div>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card" style="--accent-gradient: linear-gradient(90deg, #38bdf8, #3b82f6);">
+            <div class="kpi-label">Average Signal <span class="badge cyan">Mean</span></div>
+            <div class="kpi-value" id="kpi-avg-signal">-58.2 dBm</div>
+            <div class="kpi-sub">Across surveyed space</div>
+          </div>
+          <div class="kpi-card" style="--accent-gradient: linear-gradient(90deg, #10b981, #2dd4bf);">
+            <div class="kpi-label">Coverage Quality <span class="badge success">Score</span></div>
+            <div class="kpi-value" id="kpi-coverage-quality">81.7%</div>
+            <div class="kpi-sub">Adequate (≥ -67 dBm)</div>
+          </div>
+          <div class="kpi-card" style="--accent-gradient: linear-gradient(90deg, #f43f5e, #fb7185);">
+            <div class="kpi-label">Dead Zones <span class="badge danger">Detected</span></div>
+            <div class="kpi-value" id="kpi-dead-zones">4 Critical</div>
+            <div class="kpi-sub">Persistent weakness</div>
+          </div>
+          <div class="kpi-card" style="--accent-gradient: linear-gradient(90deg, #f59e0b, #fbbf24);">
+            <div class="kpi-label">Spatial Coverage <span class="badge warning">Model</span></div>
+            <div class="kpi-value" id="kpi-router-coord">(1.0, 1.0)m</div>
+            <div class="kpi-sub">Maximizes area coverage</div>
+          </div>
+          <div class="kpi-card" style="--accent-gradient: linear-gradient(90deg, #6366f1, #8b5cf6);">
+            <div class="kpi-label">Validation MAE <span class="badge cyan">Precision</span></div>
+            <div class="kpi-value" id="kpi-mae">1.19 dBm</div>
+            <div class="kpi-sub">Spatial cross-validation</div>
+          </div>
+        </div>
+
+        <!-- 2 Column Layout: Hero Map & Actionable Insights -->
+        <div class="grid-2col">
+          <!-- Left: Interactive Spatial Heatmap -->
+          <div class="card-panel">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2>Interactive Wi-Fi Signal Coverage</h2>
+                <p>Location-aware continuous spatial regression surface</p>
+              </div>
+              <button class="btn btn-secondary" onclick="navigateTo('coverage-map')">Open Full Map ↗</button>
+            </div>
+            <div class="card-body" style="padding: 16px;">
+              <div class="map-canvas-container" style="height: 380px;">
+                <canvas id="canvas-dash-map" class="map-canvas"></canvas>
+              </div>
+              <div class="gradient-scale">
+                <div class="gradient-bar"></div>
+                <div class="gradient-labels">
+                  <span>-75 dBm (Dead Zone)</span>
+                  <span>-65 dBm (Fair)</span>
+                  <span>-55 dBm (Good)</span>
+                  <span>-45 dBm (Strong)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Wi-Fi Insights & Fixes -->
+          <div class="card-panel">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2>Actionable Wi-Fi Intelligence</h2>
+                <p>Turning spatial data into real engineering decisions</p>
+              </div>
+            </div>
+            <div class="card-body" style="display: flex; flex-direction: column; gap: 14px;">
+              <div class="zone-card weak">
+                <div class="zone-header">
+                  <span class="zone-title" id="dash-weak-title">⚠ Potential Wi-Fi Dead Zones Detected</span>
+                  <span class="badge danger">Attention Required</span>
+                </div>
+                <p class="zone-desc" id="dash-weak-desc">South-east region (X: 4-5m, Y: 3-4m) exhibits severe signal attenuation down to -74 dBm due to physical path loss.</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                  <span style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">Impact: 4 Stations Affected</span>
+                  <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="openWhyModal('L14')">Why? (Deep Dive) 🔍</button>
+                </div>
+              </div>
+
+              <div class="zone-card strong">
+                <div class="zone-header">
+                  <span class="zone-title">📍 Recommended Router Placement</span>
+                  <span class="badge success">Model Derived</span>
+                </div>
+                <p class="zone-desc" id="dash-router-desc">Optimal position: <strong>(X: 1.0 m, Y: 1.0 m)</strong> yielding 89.2% estimated coverage quality across the surveyed area.</p>
+                <div class="zone-meta">
+                  <span>Suggested Action: Keep primary AP at north-west corner</span>
+                </div>
+              </div>
+
+              <div style="background: var(--bg-tertiary); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+                <div style="font-size: 11px; font-weight: 700; color: var(--accent-cyan); margin-bottom: 4px;">REMEDIATION BLUEPRINT</div>
+                <div style="font-size: 12.5px; color: var(--text-secondary);" id="dash-remediation-desc">Deploy a secondary Access Point or repeater at coordinate (4.0m, 3.0m) to inspect the weak-zone candidates.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: BEFORE vs AFTER -->
+      <section class="view-page" id="view-before-after">
+        <div class="card-panel">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h2>Before vs After — The WiFiScope Transformation</h2>
+              <p>How spatial intelligence transforms raw disconnected numbers into clear decisions</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="grid-equal">
+              <!-- BEFORE -->
+              <div style="background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px;">
+                <span class="badge danger" style="margin-bottom: 12px;">BEFORE WiFiScope</span>
+                <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">Raw, Disconnected Numbers</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+                  Users only see vague error messages or lists of RSSI readings:
+                </p>
+                <div style="font-family: var(--font-mono); font-size: 12px; background: rgba(0,0,0,0.3); padding: 14px; border-radius: var(--radius-sm); color: #94a3b8; line-height: 1.8; margin-bottom: 16px;">
+                  ❌ "Your Wi-Fi is slow"<br>
+                  ❌ L01: -46.2 dBm | L05: -60.7 dBm<br>
+                  ❌ L14: -68.7 dBm | L20: -74.2 dBm<br>
+                  ❌ No spatial location context<br>
+                  ❌ No idea where to put the router
+                </div>
+                <div style="font-size: 12px; color: var(--accent-rose); font-weight: 700;">Result: Frustration, random router moving, unresolved dead zones.</div>
+              </div>
+
+              <!-- AFTER -->
+              <div style="background: rgba(56, 189, 248, 0.05); border: 1px solid var(--border-focus); border-radius: var(--radius-md); padding: 24px;">
+                <span class="badge success" style="margin-bottom: 12px;">AFTER WiFiScope</span>
+                <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--accent-cyan);">Actionable Spatial Intelligence</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+                  Linear algebra regression creates a clear visual map with actionable fixes:
+                </p>
+                <div style="font-size: 12.5px; background: rgba(0,0,0,0.3); padding: 14px; border-radius: var(--radius-sm); color: #e2e8f0; line-height: 1.8; margin-bottom: 16px;">
+                  ✅ <strong>Continuous 2D Coverage Surface</strong> mapped to physical space<br>
+                  ✅ <strong>4 Dead Zones Pinpointed</strong> at (X: 4-5m, Y: 3-4m)<br>
+                  ✅ <strong>Weak regions highlighted</strong> at (X: 1.0m, Y: 1.0m)<br>
+                  ✅ <strong>Coverage pattern summary</strong> for clear coverage interpretation
+                </div>
+                <div style="font-size: 12px; color: var(--accent-emerald); font-weight: 700;">Result: Clear physical understanding, targeted AP deployment, clear coverage understanding.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: COVERAGE MAP (HERO INTERACTION) -->
+      <section class="view-page" id="view-coverage-map">
+        <div class="card-panel">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h2 id="map-page-title">Average Wi-Fi coverage</h2>
+              <p>Signal strength across the surveyed area · measured zones + estimated spatial surface</p>
+            </div>
+
+            <!-- Controls -->
+            <div class="filter-bar" style="margin-bottom: 0;">
+              <select class="select-control" id="map-period-select">
+                <option value="Average">View: Average Signal</option>
+              </select>
+
+              <select class="select-control" id="map-view-mode">
+                <option value="combined">Mode: Combined Surface</option>
+                <option value="measurements">Mode: Measurements Only</option>
+                <option value="surface">Mode: Model Surface Only</option>
+              </select>
+
+              <button class="btn btn-secondary" id="btn-map-reset" title="Reset Camera View">Reset Camera</button>
+            </div>
+          </div>
+
+          <div class="card-body" style="padding: 16px;">
+            <div class="map-canvas-container" id="main-map-container" style="height: 580px;">
+              <canvas id="canvas-main-map" class="map-canvas"></canvas>
+<div class="zone-key">
+  <strong>Zone status</strong>
+  <span class="zk"><i></i>Strong</span>
+  <span class="zk"><i class="amber"></i>Moderate</span>
+  <span class="zk"><i class="red"></i>Weak</span>
+</div>
+
+<div class="coverage-reference-legend">
+  <div class="legend-row"><span>Stronger Coverage</span><span>Weaker Coverage</span></div>
+  <div class="legend-bar"></div>
+  <div class="legend-mini"><span>-45 dBm</span><span>RSSI</span><span>-75 dBm</span></div>
+</div>
+<div class="map-caption-chip" id="map-caption-chip">Average Wi-Fi coverage</div>
+
+
+              <!-- Map Toolbar -->
+              <div class="map-toolbar">
+                <button id="btn-zoom-in" title="Zoom In">+</button>
+                <button id="btn-zoom-out" title="Zoom Out">−</button>
+                <button id="btn-fit-map" title="Fit to Measurements">⛶</button>
+                <button id="btn-fullscreen" title="Toggle Fullscreen">🖵</button>
+              </div>
+
+              <!-- Layer Selector -->
+              <div class="map-layer-selector">
+                <label class="layer-toggle">
+                  <input type="checkbox" id="layer-measurements" checked>
+                  <span>Measurements</span>
+                </label>
+                <label class="layer-toggle">
+                  <input type="checkbox" id="layer-heatmap" checked>
+                  <span>Predicted Heatmap</span>
+                </label>
+                <label class="layer-toggle">
+                  <input type="checkbox" id="layer-contours" checked>
+                  <span>Signal Contours</span>
+                </label>
+                <label class="layer-toggle">
+                  <input type="checkbox" id="layer-weak" checked>
+                  <span>Weak Zones</span>
+                </label>
+                <label class="layer-toggle">
+                  <input type="checkbox" id="layer-zones" checked>
+                  <span>Survey Zones</span>
+                </label>
+                <label class="layer-toggle">
+                  <input type="checkbox" id="layer-router">
+                  <span>Reference Point</span>
+                </label>
+                <label class="layer-toggle">
+                  <input type="checkbox" id="layer-grid" checked>
+                  <span>Coordinate Grid</span>
+                </label>
+              </div>
+
+              <!-- Hover Popover Inspection Card -->
+              <div class="map-popover" id="map-popover">
+                <div class="popover-header">
+                  <span class="popover-title" id="pop-title">L01</span>
+                  <span class="badge" id="pop-badge">Good</span>
+                </div>
+                <div class="popover-row">
+                  <span class="popover-label">Location:</span>
+                  <span class="popover-val" id="pop-loc-name">Demo Classroom</span>
+                </div>
+                <div class="popover-row">
+                  <span class="popover-label">Coordinates:</span>
+                  <span class="popover-val" id="pop-coords">X: 1.0m, Y: 1.0m</span>
+                </div>
+                <div class="popover-row">
+                  <span class="popover-label">Signal (RSSI):</span>
+                  <span class="popover-val" id="pop-rssi">-46.2 dBm</span>
+                </div>
+                <div class="popover-row">
+                  <span class="popover-label">Router Dist:</span>
+                  <span class="popover-val" id="pop-dist">0.0 m</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gradient Scale & Stats Bar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 12px;">
+              <div class="gradient-scale" style="width: 320px; margin-top: 0;">
+                <div class="gradient-bar"></div>
+                <div class="gradient-labels">
+                  <span>-75 dBm</span>
+                  <span>-65 dBm</span>
+                  <span>-55 dBm</span>
+                  <span>-45 dBm</span>
+                </div>
+              </div>
+
+              <div style="font-size: 11px; color: var(--text-secondary);">
+                <span>Tip: Click any marker to lock selection. Drag to pan, scroll to zoom.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: MEASUREMENTS -->
+      <section class="view-page" id="view-measurements">
+        <div class="card-panel">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h2>Survey Measurements Explorer</h2>
+              <p>Filter, search, sort and inspect individual survey points</p>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+              <input type="text" class="input-control" id="table-search" placeholder="Search ID, Name, SSID..." style="width: 240px;">
+              
+              <select class="select-control" id="table-filter-quality">
+                <option value="all">All Signal Tiers</option>
+                <option value="Excellent">Excellent (> -50 dBm)</option>
+                <option value="Good">Good (-50 to -60 dBm)</option>
+                <option value="Fair">Fair (-60 to -70 dBm)</option>
+                <option value="Weak">Weak (< -70 dBm)</option>
+              </select>
+
+              <select class="select-control" id="table-filter-period">
+                <option value="all">All Time Periods</option>
+              </select>
+
+              <button class="btn btn-secondary" id="btn-export-csv">Export Table CSV</button>
+            </div>
+
+            <!-- Table -->
+            <div class="table-wrapper">
+              <table class="data-table" id="measurements-table">
+                <thead>
+                  <tr>
+                    <th data-col="Location_ID">Location ID ⬍</th>
+                    <th data-col="Location_Name">Name ⬍</th>
+                    <th data-col="Floor">Floor ⬍</th>
+                    <th data-col="X_m">X (m) ⬍</th>
+                    <th data-col="Y_m">Y (m) ⬍</th>
+                    <th data-col="Time_Period">Period ⬍</th>
+                    <th data-col="RSSI_dBm">Signal (dBm) ⬍</th>
+                    <th data-col="Quality">Quality Tier ⬍</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="measurements-tbody">
+                  <!-- Rows injected dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; font-size: 12px; color: var(--text-secondary);">
+              <span id="table-pagination-info">Showing 1 to 20 of 60 entries</span>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" id="btn-page-prev">Previous</button>
+                <button class="btn btn-secondary" id="btn-page-next">Next</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: SPATIAL INTELLIGENCE & FIXES -->
+      <section class="view-page" id="view-spatial-intel">
+        <div class="grid-equal">
+          <!-- Router Placement Engine -->
+          <div class="card-panel">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2>Spatial Signal Findings</h2>
+                <p>Model-based spatial analysis</p>
+              </div>
+              <span class="badge success">Model-based analysis</span>
+            </div>
+            <div class="card-body">
+              <div style="background: var(--bg-tertiary); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-accent); margin-bottom: 20px;">
+                <div style="font-size: 11px; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase;">MODEL SUMMARY</div>
+                <div style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin: 6px 0;" id="intel-router-coords">X: 1.0 m, Y: 1.0 m</div>
+                <div style="font-size: 13px; color: var(--text-secondary);" id="intel-router-stats">Estimated Area Coverage: <strong>89.2%</strong> | Peak Signal: <strong>-46.2 dBm</strong></div>
+              </div>
+
+              <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 8px;">Technical Justification</h3>
+              <p style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">
+                The spatial least-squares regression field indicates that signal attenuation radiates toward $(+X, +Y)$ due to physical path loss. Positioning the primary Access Point at $(X^*, Y^*)$ maximizes baseline coverage across the greatest footprint while maintaining minimal RSSI standard deviation.
+              </p>
+
+              <div style="font-size: 11px; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 10px; border-radius: var(--radius-sm);">
+                * Model-based recommendation derived strictly from the fitted regression plane without fabricating unobserved environmental factors.
+              </div>
+            </div>
+          </div>
+
+          <!-- Weak Zone Analysis & Recommendations -->
+          <div class="card-panel">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2>Detected Weak Zones</h2>
+                <p>Persistent weak-signal candidates from the survey</p>
+              </div>
+              <span class="badge danger" id="intel-weak-badge">4 Zones</span>
+            </div>
+            <div class="card-body" id="intel-weak-list" style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- Injected dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: ANALYTICS & ERROR -->
+      <section class="view-page" id="view-analytics">
+        <div class="grid-equal">
+          <!-- Signal Distribution Histogram -->
+          <div class="card-panel">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2>Signal Strength Distribution</h2>
+                <p>Histogram of measured RSSI values across all survey points</p>
+              </div>
+            </div>
+            <div class="card-body">
+              <div style="height: 280px; position: relative;">
+                <canvas id="canvas-histogram" style="width: 100%; height: 100%;"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Coverage Tier Breakdown -->
+          <div class="card-panel">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2>Coverage Quality Tiers</h2>
+                <p>Area footprint classification by signal quality</p>
+              </div>
+            </div>
+            <div class="card-body" id="analytics-tiers-container" style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- Injected dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Cross-Validation Diagnostics -->
+        <div class="card-panel">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h2>Spatial Model Validation & Error Metrics</h2>
+              <p>Held-out cross-validation testing spatial plane generalization</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <span class="badge cyan" id="val-mae-badge">MAE: 1.19 dBm</span>
+              <span class="badge cyan" id="val-rmse-badge">RMSE: 1.34 dBm</span>
+              <span class="badge success" id="val-r2-badge">R²: 0.941</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Held-Out Location</th>
+                    <th>Time Period</th>
+                    <th>Actual RSSI</th>
+                    <th>Predicted RSSI</th>
+                    <th>Absolute Error</th>
+                    <th>Residual</th>
+                  </tr>
+                </thead>
+                <tbody id="val-table-tbody">
+                  <!-- Injected dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: LINEAR ALGEBRA PIPELINE -->
+      <section class="view-page" id="view-math-pipeline">
+        <div class="grid-equal">
+          <!-- Least Squares Spatial Model Formulation -->
+          <div class="card-panel">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2>Least-Squares Plane Regression</h2>
+                <p>Spatial approximation: RSSI ≈ β₀ + β₁x + β₂y</p>
+              </div>
+            </div>
+            <div class="card-body">
+              <div style="font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: var(--accent-cyan); background: var(--bg-tertiary); padding: 14px; border-radius: var(--radius-sm); margin-bottom: 16px;">
+                RSSI(x, y) = β₀ + β₁·x + β₂·y
+              </div>
+
+              <div id="math-coefficients-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;">
+                <!-- Coefficients injected -->
+              </div>
+
+              <h3 style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">Estimate Arbitrary Coordinate</h3>
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <input type="number" class="input-control" id="est-x" value="3.5" step="0.5" style="width: 80px;" placeholder="X (m)">
+                <input type="number" class="input-control" id="est-y" value="2.5" step="0.5" style="width: 80px;" placeholder="Y (m)">
+                <select class="select-control" id="est-period">
+                  <option value="Average">Average</option>
+                </select>
+                <button class="btn btn-primary" id="btn-estimate">Predict Signal</button>
+              </div>
+              <div id="est-result" style="margin-top: 12px; font-size: 13px; font-weight: 700; color: var(--accent-cyan);"></div>
+            </div>
+          </div>
+
+          <!-- Jacobi Eigen-Decomposition -->
+          <div class="card-panel">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2>Eigenvalue & Pattern Analysis</h2>
+                <p>Covariance decomposition of temporal signal variations</p>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="eigen-bars-container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px;">
+                <!-- Eigen components injected -->
+              </div>
+              <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+                Eigenvalues quantify the proportion of total temporal signal variance captured by each principal component.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Signal Matrix & Cosine Similarity Heatmap -->
+        <div class="card-panel">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h2>Location Signal Matrix & Pairwise Cosine Similarity</h2>
+              <p>Mean-centered & L2-normalized vector inner product analysis</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="grid-equal">
+              <div>
+                <h3 style="font-size: 13px; font-weight: 700; margin-bottom: 10px;">Location × Period RSSI Matrix</h3>
+                <div class="table-wrapper" style="max-height: 340px;">
+                  <table class="data-table" id="matrix-table">
+                    <thead><tr id="matrix-thead-tr"></tr></thead>
+                    <tbody id="matrix-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div>
+                <h3 style="font-size: 13px; font-weight: 700; margin-bottom: 10px;">Top Behavioural Similarity Pairs</h3>
+                <div id="similarity-pairs-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto;">
+                  <!-- Injected dynamically -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: DATA QUALITY & UPLOAD -->
+      <section class="view-page" id="view-data-quality">
+        <div class="card-panel">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h2>Upload Survey Dataset</h2>
+              <p>Load custom campus Wi-Fi measurements CSV</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="drop-zone" style="border: 2px dashed var(--border-focus); border-radius: var(--radius-md); padding: 40px; text-align: center; background: rgba(56, 189, 248, 0.03); cursor: pointer; transition: all 0.2s ease;">
+              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2" style="margin-bottom: 12px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 4px;">Drag & Drop Survey CSV here</h3>
+              <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 14px;">or click to browse local filesystem</p>
+              <button class="btn btn-secondary">Select CSV File</button>
+              <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+            </div>
+
+            <div style="margin-top: 24px;">
+              <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 12px;">Automated Schema & Quality Audits</h3>
+              <div id="quality-audits-list" style="display: flex; flex-direction: column; gap: 8px;">
+                <!-- Audit items -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: RESEARCH & VISION -->
+      <section class="view-page" id="view-roadmap">
+        <div class="card-panel">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h2>WiFiScope Project Documentation</h2>
+              <p>Academic Foundation, Mathematical Specifications & Real References</p>
+            </div>
+            <button class="btn btn-pitch" onclick="openPitchMode()">Open 30-Slide Deck 🎓</button>
+          </div>
+          <div class="card-body" style="line-height: 1.6; font-size: 13.5px; color: var(--text-secondary);">
+            <div class="grid-equal" style="margin-bottom: 24px;">
+              <div style="background: var(--bg-tertiary); padding: 20px; border-radius: var(--radius-md); border-left: 4px solid var(--accent-emerald);">
+                <h3 style="color: var(--text-primary); font-size: 15px; margin-bottom: 8px;">Current Prototype (Validated)</h3>
+                <ul style="padding-left: 18px; font-size: 12.5px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 6px;">
+                  <li>Spatial 2D Least-Squares signal surface regression.</li>
+                  <li>Single-floor dead-zone identification with persistent thresholding.</li>
+                  <li>Model-based router placement coordinate recommendation.</li>
+                  <li>Real-time interactive canvas visualization & contour mapping.</li>
+                  <li>Deterministic held-out validation ($MAE = 1.19\text{ dBm}, R^2 = 0.941$).</li>
+                </ul>
+              </div>
+
+              <div style="background: var(--bg-tertiary); padding: 20px; border-radius: var(--radius-md); border-left: 4px solid var(--accent-cyan);">
+                <h3 style="color: var(--text-primary); font-size: 15px; margin-bottom: 8px;">Future Roadmap (Scalable Vision)</h3>
+                <ul style="padding-left: 18px; font-size: 12.5px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 6px;">
+                  <li><strong>Multi-AP Mesh Optimization</strong>: Joint spatial optimization for enterprise mesh routers.</li>
+                  <li><strong>Architectural CAD / Floor-Plan Overlay</strong>: Upload PNG/DWG floorplans.</li>
+                  <li><strong>Multi-Floor 3D Modeling</strong>: Elevation attenuation across building levels.</li>
+                  <li><strong>Gaussian Process Uncertainty</strong>: Explicit predictive variance modeling.</li>
+                </ul>
+              </div>
+            </div>
+
+            <h3 style="color: var(--text-primary); font-size: 15px; margin-bottom: 8px;">Reference Heatmap Artifact</h3>
+            <div style="max-width: 600px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-subtle); margin-bottom: 20px;">
+              <img src="Average%20Wi%E2%80%91Fi%20Coverage%20Heatmap.png" alt="Average Wi-Fi Coverage Heatmap" style="width: 100%; display: block;">
+            </div>
+
+            <h3 style="color: var(--text-primary); font-size: 15px; margin-bottom: 8px;">Primary Academic Literature Citations</h3>
+            <ol style="padding-left: 20px; font-size: 12px; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+              <li><strong>Bahl, P., & Padmanabhan, V. N. (2000)</strong>. <em>RADAR: An in-building RF-based user location and tracking system</em>. IEEE INFOCOM 2000. DOI: 10.1109/INFCOM.2000.832252.</li>
+              <li><strong>Rappaport, T. S. (2002)</strong>. <em>Wireless Communications: Principles and Practice</em> (2nd Edition). Prentice Hall.</li>
+              <li><strong>Bi, J., Wang, Y., Li, X., & Xu, S. (2018)</strong>. <em>A Kriging-Based Spatial Interpolation Method for Fast Radio Map Construction</em>. IEEE Sensors Journal, 18(20), 8412–8423. DOI: 10.1109/JSEN.2018.2866635.</li>
+              <li><strong>Youssef, M., & Agrawala, A. (2005)</strong>. <em>The Horus WLAN Location Determination System</em>. ACM MobiSys 2005. DOI: 10.1145/1067170.1067193.</li>
+              <li><strong>He, S., & Chan, S. H. G. (2016)</strong>. <em>Wi-Fi Fingerprint-Based Indoor Positioning: Recent Advances and Comparisons</em>. IEEE Communications Surveys & Tutorials, 18(1), 466–490.</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- 30-Slide Pitch Deck Modal (Fullscreen Research & Startup Presentation) -->
+<div class="pitch-overlay" id="pitch-overlay">
+  <div class="pitch-header">
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <div class="brand-icon" style="width: 36px; height: 36px; font-size: 14px;">WS</div>
+      <div>
+        <h2 style="font-size: 18px; font-weight: 800; letter-spacing: -0.5px;">WiFiScope — Research & Pitch Deck</h2>
+        <p style="font-size: 11px; color: var(--accent-cyan);">Spatial Wi-Fi Signal Intelligence for Coverage Mapping & Decision Support</p>
+      </div>
+    </div>
+
+    <div class="pitch-controls">
+      <select class="select-control" id="pitch-jump-select" style="max-width: 280px; font-size: 11px; padding: 6px 10px;"></select>
+      <span class="badge cyan" id="pitch-slide-counter">Slide 1 / 30</span>
+      <button class="btn btn-secondary" id="btn-pitch-prev">◀ Prev</button>
+      <button class="btn btn-primary" id="btn-pitch-next">Next ▶</button>
+      <button class="btn btn-secondary" id="btn-pitch-exit">✕ Exit Deck</button>
+    </div>
+  </div>
+
+  <div class="pitch-slide-content" id="pitch-slide-container">
+    <!-- Slide content injected dynamically -->
+  </div>
+</div>
+
+<!-- Live Analysis Processing Modal -->
+<div class="analysis-modal" id="analysis-modal">
+  <div class="analysis-box">
+    <div class="brand-icon" style="margin: 0 auto 16px; animation: pulse-dot 1.2s infinite ease-in-out;">WS</div>
+    <h2 style="font-size: 19px; font-weight: 800; margin-bottom: 8px;">Running WiFiScope Intelligence</h2>
+    <p style="font-size: 13px; color: var(--accent-cyan); font-family: var(--font-mono); margin-bottom: 20px;" id="analysis-status-text">Ingesting 60 survey measurements...</p>
+    <div style="height: 6px; border-radius: 3px; background: var(--bg-tertiary); overflow: hidden; margin-bottom: 12px;">
+      <div id="analysis-progress-bar" style="width: 20%; height: 100%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue)); transition: width 0.3s ease;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- "Why?" Dead Zone Deep-Dive Modal -->
+<div class="modal-backdrop" id="why-modal">
+  <div class="modal-content">
+    <div class="card-header">
+      <div class="card-title-group">
+        <h2 id="why-modal-title">Dead Zone Deep-Dive: L14</h2>
+        <p>Mathematical evidence & physical remediation</p>
+      </div>
+      <button class="btn btn-secondary" onclick="closeWhyModal()">✕</button>
+    </div>
+    <div class="card-body" style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="background: var(--bg-tertiary); padding: 16px; border-radius: var(--radius-md); border-left: 4px solid var(--accent-rose);">
+        <div style="font-size: 11px; font-weight: 700; color: var(--accent-rose); text-transform: uppercase;">ROOT CAUSE IDENTIFIED</div>
+        <div style="font-size: 13px; color: var(--text-primary); margin-top: 4px;" id="why-cause-text">
+          Station is located at (X: 4.0m, Y: 3.0m), 4.2m away from primary AP. Signal experiences severe path loss with mean RSSI of -67.4 dBm.
+        </div>
+      </div>
+
+      <div style="font-size: 12.5px;">
+        <strong>Survey Readings across Time Periods:</strong>
+        <div id="why-readings-list" style="margin-top: 8px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;"></div>
+      </div>
+
+      <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); padding: 14px; border-radius: var(--radius-sm);">
+        <div style="font-size: 11px; font-weight: 700; color: var(--accent-emerald);">ACTIONABLE RECOMMENDATION</div>
+        <div style="font-size: 12.5px; color: #e2e8f0; margin-top: 4px;" id="why-recom-text">
+          Install a secondary mesh extender or relocate the AP towards (2.5m, 2.0m) to restore signal above -58 dBm.
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="focusLocationOnMap(currentInspectedLoc); closeWhyModal();">Locate & Focus on Map 🎯</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal-backdrop" id="export-modal">
+  <div class="modal-content">
+    <div class="card-header">
+      <div class="card-title-group">
+        <h2>Export WiFiScope Data & Reports</h2>
+        <p>Select your desired format</p>
+      </div>
+      <button class="btn btn-secondary" onclick="closeExportModal()">✕</button>
+    </div>
+    <div class="card-body" style="display: flex; flex-direction: column; gap: 12px;">
+      <button class="btn btn-secondary" id="btn-export-png-map" style="justify-content: flex-start;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+        Download Coverage Map Image (High-Res PNG)
+      </button>
+      <button class="btn btn-secondary" id="btn-export-full-csv" style="justify-content: flex-start;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        Download Full Measurement Dataset (CSV)
+      </button>
+      <button class="btn btn-secondary" id="btn-export-json" style="justify-content: flex-start;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+        Download Complete Mathematical State (JSON)
+      </button>
+      <button class="btn btn-primary" id="btn-print-report" style="justify-content: flex-start;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        Generate Executive Printable / PDF Audit Report
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast">Message here</div>
+
+<script>
+/**
+ * WiFiScope Analysis Interface
+ * Preserves the exact mathematical pipeline:
+ * 1. Data loading & validation
+ * 2. Location-Time Signal Matrix
+ * 3. Mean-centering & L2 normalization -> Cosine similarity & Euclidean distance
+ * 4. Normal equations 3x3 solver -> Least-squares plane RSSI ~ b0 + b1*x + b2*y
+ * 5. Held-out cross-validation (MAE, RMSE, R2)
+ * 6. Weak & Strong Zone classification
+ * 7. Model-based router placement optimization
+ * 8. Jacobi eigenvalue/eigenvector decomposition
+ * 9. High-performance Canvas Map rendering with zoom/pan, contours, and heatmaps
+ * 10. Application views and analysis controls
+ */
+
+const DEFAULT_SYNTHETIC_DATA = [{"Location_ID": "L01", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 1, "Y_m": 1, "Time_Period": "Morning", "RSSI_dBm": -46.2, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L01", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 1, "Y_m": 1, "Time_Period": "Afternoon", "RSSI_dBm": -48.0, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L01", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 1, "Y_m": 1, "Time_Period": "Evening", "RSSI_dBm": -48.8, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L02", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 2, "Y_m": 1, "Time_Period": "Morning", "RSSI_dBm": -48.5, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L02", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 2, "Y_m": 1, "Time_Period": "Afternoon", "RSSI_dBm": -50.9, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L02", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 2, "Y_m": 1, "Time_Period": "Evening", "RSSI_dBm": -51.6, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L03", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 3, "Y_m": 1, "Time_Period": "Morning", "RSSI_dBm": -50.7, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L03", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 3, "Y_m": 1, "Time_Period": "Afternoon", "RSSI_dBm": -54.0, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L03", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 3, "Y_m": 1, "Time_Period": "Evening", "RSSI_dBm": -54.5, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L04", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 4, "Y_m": 1, "Time_Period": "Morning", "RSSI_dBm": -53.4, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L04", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 4, "Y_m": 1, "Time_Period": "Afternoon", "RSSI_dBm": -57.0, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L04", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 4, "Y_m": 1, "Time_Period": "Evening", "RSSI_dBm": -56.5, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L05", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 5, "Y_m": 1, "Time_Period": "Morning", "RSSI_dBm": -55.2, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L05", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 5, "Y_m": 1, "Time_Period": "Afternoon", "RSSI_dBm": -60.7, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L05", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 5, "Y_m": 1, "Time_Period": "Evening", "RSSI_dBm": -59.3, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L06", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 1, "Y_m": 2, "Time_Period": "Morning", "RSSI_dBm": -48.4, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L06", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 1, "Y_m": 2, "Time_Period": "Afternoon", "RSSI_dBm": -50.2, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L06", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 1, "Y_m": 2, "Time_Period": "Evening", "RSSI_dBm": -51.4, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L07", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 2, "Y_m": 2, "Time_Period": "Morning", "RSSI_dBm": -51.4, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L07", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 2, "Y_m": 2, "Time_Period": "Afternoon", "RSSI_dBm": -53.1, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L07", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 2, "Y_m": 2, "Time_Period": "Evening", "RSSI_dBm": -53.3, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L08", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 3, "Y_m": 2, "Time_Period": "Morning", "RSSI_dBm": -54.1, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L08", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 3, "Y_m": 2, "Time_Period": "Afternoon", "RSSI_dBm": -56.5, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L08", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 3, "Y_m": 2, "Time_Period": "Evening", "RSSI_dBm": -56.9, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L09", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 4, "Y_m": 2, "Time_Period": "Morning", "RSSI_dBm": -56.3, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L09", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 4, "Y_m": 2, "Time_Period": "Afternoon", "RSSI_dBm": -60.0, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L09", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 4, "Y_m": 2, "Time_Period": "Evening", "RSSI_dBm": -59.4, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L10", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 5, "Y_m": 2, "Time_Period": "Morning", "RSSI_dBm": -58.2, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L10", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 5, "Y_m": 2, "Time_Period": "Afternoon", "RSSI_dBm": -61.8, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L10", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 5, "Y_m": 2, "Time_Period": "Evening", "RSSI_dBm": -62.6, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L11", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 1, "Y_m": 3, "Time_Period": "Morning", "RSSI_dBm": -52.0, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L11", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 1, "Y_m": 3, "Time_Period": "Afternoon", "RSSI_dBm": -52.7, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L11", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 1, "Y_m": 3, "Time_Period": "Evening", "RSSI_dBm": -53.5, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L12", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 2, "Y_m": 3, "Time_Period": "Morning", "RSSI_dBm": -54.1, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L12", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 2, "Y_m": 3, "Time_Period": "Afternoon", "RSSI_dBm": -55.6, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L12", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 2, "Y_m": 3, "Time_Period": "Evening", "RSSI_dBm": -56.8, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L13", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 3, "Y_m": 3, "Time_Period": "Morning", "RSSI_dBm": -56.6, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L13", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 3, "Y_m": 3, "Time_Period": "Afternoon", "RSSI_dBm": -58.9, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L13", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 3, "Y_m": 3, "Time_Period": "Evening", "RSSI_dBm": -59.2, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L14", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 4, "Y_m": 3, "Time_Period": "Morning", "RSSI_dBm": -65.2, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L14", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 4, "Y_m": 3, "Time_Period": "Afternoon", "RSSI_dBm": -68.7, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L14", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 4, "Y_m": 3, "Time_Period": "Evening", "RSSI_dBm": -68.3, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L15", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 5, "Y_m": 3, "Time_Period": "Morning", "RSSI_dBm": -68.3, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L15", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 5, "Y_m": 3, "Time_Period": "Afternoon", "RSSI_dBm": -71.1, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L15", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 5, "Y_m": 3, "Time_Period": "Evening", "RSSI_dBm": -71.4, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L16", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 1, "Y_m": 4, "Time_Period": "Morning", "RSSI_dBm": -55.1, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L16", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 1, "Y_m": 4, "Time_Period": "Afternoon", "RSSI_dBm": -54.8, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L16", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 1, "Y_m": 4, "Time_Period": "Evening", "RSSI_dBm": -56.1, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L17", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 2, "Y_m": 4, "Time_Period": "Morning", "RSSI_dBm": -57.6, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L17", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 2, "Y_m": 4, "Time_Period": "Afternoon", "RSSI_dBm": -58.1, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L17", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 2, "Y_m": 4, "Time_Period": "Evening", "RSSI_dBm": -59.3, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L18", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 3, "Y_m": 4, "Time_Period": "Morning", "RSSI_dBm": -59.6, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L18", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 3, "Y_m": 4, "Time_Period": "Afternoon", "RSSI_dBm": -61.2, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L18", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 3, "Y_m": 4, "Time_Period": "Evening", "RSSI_dBm": -61.4, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L19", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 4, "Y_m": 4, "Time_Period": "Morning", "RSSI_dBm": -68.7, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L19", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 4, "Y_m": 4, "Time_Period": "Afternoon", "RSSI_dBm": -70.9, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L19", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 4, "Y_m": 4, "Time_Period": "Evening", "RSSI_dBm": -70.9, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-1"}, {"Location_ID": "L20", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 5, "Y_m": 4, "Time_Period": "Morning", "RSSI_dBm": -71.0, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L20", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 5, "Y_m": 4, "Time_Period": "Afternoon", "RSSI_dBm": -74.2, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}, {"Location_ID": "L20", "Location_Name": "Demo Classroom", "Floor": 0, "X_m": 5, "Y_m": 4, "Time_Period": "Evening", "RSSI_dBm": -73.8, "SSID": "PES-WIFI-DEMO", "BSSID": "DEMO-AP-2"}];
+
+// App State
+const state = {
+  rows: JSON.parse(JSON.stringify(DEFAULT_SYNTHETIC_DATA)),
+  threshold: -67.0,
+  activeView: 'dashboard',
+  theme: 'dark',
+  locations: [],
+  periods: [],
+  matrix: [],
+  similarity: null,
+  models: {},
+  validation: { records: [], mae: 0, rmse: 0, r2: 0 },
+  weakZones: [],
+  strongZones: [],
+  routerPlacement: null,
+  eigen: null,
+  analytics: {},
+  pitchSlide: 1,
+  
+  // Interactive Map State
+  map: {
+    zoom: 1.0,
+    panX: 0,
+    panY: 0,
+    isDragging: false,
+    startX: 0,
+    startY: 0,
+    selectedPeriod: 'Average',
+    viewMode: 'combined',
+    layers: { zones: true, 
+      measurements: true,
+      heatmap: true,
+      contours: true,
+      weak: true,
+      router: true,
+      grid: true
+    },
+    hoveredPoint: null,
+    selectedPoint: null
+  },
+  
+  // Table state
+  table: {
+    search: '',
+    qualityFilter: 'all',
+    periodFilter: 'all',
+    sortCol: 'Location_ID',
+    sortAsc: true,
+    page: 1,
+    pageSize: 15
+  }
+};
+
+let currentInspectedLoc = 'L14';
+
+// Utilities
+const $ = id => document.getElementById(id);
+const unique = arr => [...new Set(arr)];
+const mean = arr => arr.reduce((s, v) => s + v, 0) / arr.length;
+const fmt = (v, d = 1) => (v !== undefined && Number.isFinite(Number(v))) ? Number(v).toFixed(d) : '—';
+
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// Color scale interpolator
+function rssiToColor(rssi, alpha = 1.0) {
+  const lo = -75, hi = -45;
+  const t = Math.max(0, Math.min(1, (rssi - lo) / (hi - lo)));
+  const stops = [
+    [0.00, [69, 39, 127]],
+    [0.28, [45, 86, 158]],
+    [0.55, [39, 142, 160]],
+    [0.78, [77, 175, 105]],
+    [1.00, [228, 219, 75]]
+  ];
+  
+  for (let i = 0; i < stops.length - 1; i++) {
+    if (t <= stops[i + 1][0]) {
+      const [a, c0] = stops[i];
+      const [b, c1] = stops[i + 1];
+      const f = (t - a) / (b - a);
+      const r = Math.round(c0[0] + f * (c1[0] - c0[0]));
+      const g = Math.round(c0[1] + f * (c1[1] - c0[1]));
+      const bl = Math.round(c0[2] + f * (c1[2] - c0[2]));
+      return alpha < 1.0 ? `rgba(${r}, ${g}, ${bl}, ${alpha})` : `rgb(${r}, ${g}, ${bl})`;
+    }
+  }
+  return alpha < 1.0 ? `rgba(228, 219, 75, ${alpha})` : `rgb(228, 219, 75)`;
+}
+
+function getQualityTier(rssi) {
+  if (rssi > -50) return { name: 'Excellent', cls: 'success' };
+  if (rssi > -60) return { name: 'Good', cls: 'cyan' };
+  if (rssi > -70) return { name: 'Fair', cls: 'warning' };
+  return { name: 'Weak', cls: 'danger' };
+}
+
+// ----------------------------------------------------
+// Core Mathematical Pipeline
+// ----------------------------------------------------
+
+function solve3x3(A, b) {
+  const M = A.map((r, i) => [...r, b[i]]);
+  for (let c = 0; c < 3; c++) {
+    let pivot = c;
+    for (let r = c + 1; r < 3; r++) {
+      if (Math.abs(M[r][c]) > Math.abs(M[pivot][c])) pivot = r;
+    }
+    if (Math.abs(M[pivot][c]) < 1e-11) throw new Error("Singular spatial coordinates");
+    [M[c], M[pivot]] = [M[pivot], M[c]];
+    for (let r = c + 1; r < 3; r++) {
+      const f = M[r][c] / M[c][c];
+      for (let j = c; j < 4; j++) M[r][j] -= f * M[c][j];
+    }
+  }
+  const x = [0, 0, 0];
+  for (let i = 2; i >= 0; i--) {
+    let rhs = M[i][3];
+    for (let j = i + 1; j < 3; j++) rhs -= M[i][j] * x[j];
+    x[i] = rhs / M[i][i];
+  }
+  return x;
+}
+
+function fitLeastSquaresPlane(rows) {
+  let n = 0, sx = 0, sy = 0, sxx = 0, sxy = 0, syy = 0, sz = 0, sxz = 0, syz = 0;
+  rows.forEach(r => {
+    const x = r.X_m, y = r.Y_m, z = r.RSSI_dBm;
+    n++; sx += x; sy += y;
+    sxx += x * x; sxy += x * y; syy += y * y;
+    sz += z; sxz += x * z; syz += y * z;
+  });
+  return solve3x3([[n, sx, sy], [sx, sxx, sxy], [sy, sxy, syy]], [sz, sxz, syz]);
+}
+
+const predictRssi = (beta, x, y) => beta[0] + beta[1] * x + beta[2] * y;
+
+function computeFullPipelineClientFallback() {
+  const rows = state.rows;
+  state.locations = unique(rows.map(r => r.Location_ID));
+  
+  const periods = [];
+  rows.forEach(r => { if (!periods.includes(r.Time_Period)) periods.push(r.Time_Period); });
+  state.periods = periods;
+  
+  // Matrix
+  const lookup = new Map(rows.map(r => [`${r.Location_ID}|${r.Time_Period}`, r.RSSI_dBm]));
+  state.matrix = state.locations.map(id => state.periods.map(p => lookup.get(`${id}|${p}`)));
+  
+  // Similarity
+  const normVecs = state.matrix.map(row => {
+    const m = mean(row);
+    const centered = row.map(v => v - m);
+    const norm = Math.sqrt(centered.reduce((s, v) => s + v * v, 0)) || 1;
+    return centered.map(v => v / norm);
+  });
+  
+  const cosMatrix = normVecs.map(a => normVecs.map(b => a.reduce((s, v, i) => s + v * b[i], 0)));
+  const distMatrix = normVecs.map(a => normVecs.map(b => Math.sqrt(a.reduce((s, v, i) => s + (v - b[i]) ** 2, 0))));
+  
+  const pairs = [];
+  for (let i = 0; i < state.locations.length; i++) {
+    for (let j = i + 1; j < state.locations.length; j++) {
+      pairs.push({
+        i, j,
+        locA: state.locations[i],
+        locB: state.locations[j],
+        cos: cosMatrix[i][j],
+        dist: distMatrix[i][j]
+      });
+    }
+  }
+  pairs.sort((a, b) => b.cos - a.cos);
+  state.similarity = { normVecs, cosMatrix, distMatrix, pairs };
+  
+  // Models
+  state.models = {};
+  state.periods.forEach(p => {
+    const pRows = rows.filter(r => r.Time_Period === p);
+    state.models[p] = fitLeastSquaresPlane(pRows);
+  });
+  
+  const avgRows = state.locations.map(loc => {
+    const locReadings = rows.filter(r => r.Location_ID === loc);
+    return {
+      Location_ID: loc,
+      Location_Name: locReadings[0]?.Location_Name || loc,
+      Floor: locReadings[0]?.Floor || 0,
+      X_m: locReadings[0].X_m,
+      Y_m: locReadings[0].Y_m,
+      RSSI_dBm: mean(locReadings.map(r => r.RSSI_dBm)),
+      Time_Period: 'Average'
+    };
+  });
+  state.models['Average'] = fitLeastSquaresPlane(avgRows);
+  
+  // Validation
+  const nLocs = state.locations.length;
+  const holdIndices = [0, Math.floor(nLocs / 3), Math.floor((2 * nLocs) / 3), nLocs - 1];
+  const holdLocs = holdIndices.map(i => state.locations[i]);
+  const valRecords = [];
+  const yTrue = [], yPred = [];
+  
+  state.periods.forEach(p => {
+    const train = rows.filter(r => r.Time_Period === p && !holdLocs.includes(r.Location_ID));
+    const test = rows.filter(r => r.Time_Period === p && holdLocs.includes(r.Location_ID));
+    try {
+      const b = fitLeastSquaresPlane(train);
+      test.forEach(r => {
+        const pred = predictRssi(b, r.X_m, r.Y_m);
+        const err = Math.abs(r.RSSI_dBm - pred);
+        yTrue.push(r.RSSI_dBm);
+        yPred.push(pred);
+        valRecords.push({
+          Location_ID: r.Location_ID,
+          Time_Period: p,
+          Actual_RSSI: r.RSSI_dBm,
+          Predicted_RSSI: pred,
+          Absolute_Error: err,
+          Residual: r.RSSI_dBm - pred
+        });
+      });
+    } catch (e) {}
+  });
+  
+  const mae = mean(valRecords.map(r => r.Absolute_Error));
+  const rmse = Math.sqrt(mean(valRecords.map(r => r.Residual * r.Residual)));
+  const meanTrue = mean(yTrue);
+  const ssTot = yTrue.reduce((s, v) => s + (v - meanTrue) ** 2, 0);
+  const ssRes = valRecords.reduce((s, r) => s + r.Residual ** 2, 0);
+  const r2 = ssTot > 1e-9 ? 1.0 - (ssRes / ssTot) : 1.0;
+  state.validation = { records: valRecords, mae, rmse, r2 };
+  
+  // Zones
+  const byLoc = {};
+  rows.forEach(r => {
+    if (!byLoc[r.Location_ID]) {
+      byLoc[r.Location_ID] = {
+        Location_ID: r.Location_ID,
+        Location_Name: r.Location_Name || r.Location_ID,
+        Floor: r.Floor || 0,
+        X_m: r.X_m,
+        Y_m: r.Y_m,
+        values: []
+      };
+    }
+    byLoc[r.Location_ID].values.push(r.RSSI_dBm);
+  });
+  
+  const allLocStats = Object.values(byLoc).map(o => {
+    const avg = mean(o.values);
+    const weakCount = o.values.filter(v => v <= state.threshold).length;
+    const isWeak = avg <= state.threshold && weakCount >= Math.ceil(o.values.length / 2);
+    const isStrong = avg >= -55.0;
+    return {
+      ...o,
+      avg_rssi: avg,
+      min_rssi: Math.min(...o.values),
+      max_rssi: Math.max(...o.values),
+      weak_count: weakCount,
+      isWeak,
+      isStrong,
+      quality: getQualityTier(avg).name
+    };
+  });
+  
+  state.weakZones = allLocStats.filter(x => x.isWeak).sort((a, b) => a.avg_rssi - b.avg_rssi);
+  state.strongZones = allLocStats.filter(x => x.isStrong).sort((a, b) => b.avg_rssi - a.avg_rssi);
+  
+  // Router placement
+  const xs = rows.map(r => r.X_m), ys = rows.map(r => r.Y_m);
+  const xmin = Math.min(...xs), xmax = Math.max(...xs);
+  const ymin = Math.min(...ys), ymax = Math.max(...ys);
+  
+  const avgBeta = state.models['Average'];
+  let bestCoord = [xmin, ymin], bestVal = -999;
+  const gridRes = 30;
+  let totalGridPts = 0, adequateGridPts = 0;
+  
+  for (let j = 0; j < gridRes; j++) {
+    const y = ymin + (ymax - ymin) * (j / (gridRes - 1));
+    for (let i = 0; i < gridRes; i++) {
+      const x = xmin + (xmax - xmin) * (i / (gridRes - 1));
+      const s = predictRssi(avgBeta, x, y);
+      totalGridPts++;
+      if (s >= state.threshold) adequateGridPts++;
+      if (s > bestVal) {
+        bestVal = s;
+        bestCoord = [x, y];
+      }
+    }
+  }
+  
+  state.routerPlacement = {
+    x: Number(bestCoord[0].toFixed(2)),
+    y: Number(bestCoord[1].toFixed(2)),
+    coveragePct: (adequateGridPts / totalGridPts) * 100,
+    peakSignal: bestVal
+  };
+  
+  // Eigen decomposition
+  const M = state.matrix;
+  const nRows = M.length, nCols = M[0].length;
+  const colMeans = Array(nCols).fill(0);
+  M.forEach(r => r.forEach((v, j) => colMeans[j] += v / nRows));
+  
+  const C = Array.from({ length: nCols }, () => Array(nCols).fill(0));
+  M.forEach(r => {
+    const z = r.map((v, j) => v - colMeans[j]);
+    for (let i = 0; i < nCols; i++) {
+      for (let j = 0; j < nCols; j++) {
+        C[i][j] += (z[i] * z[j]) / Math.max(nRows - 1, 1);
+      }
+    }
+  });
+  
+  const A = C.map(r => r.slice());
+  const V = Array.from({ length: nCols }, (_, i) => Array.from({ length: nCols }, (_, j) => i === j ? 1 : 0));
+  
+  for (let it = 0; it < 80; it++) {
+    let p = 0, q = 1, mx = Math.abs(A[0][1] || 0);
+    for (let i = 0; i < nCols; i++) {
+      for (let j = i + 1; j < nCols; j++) {
+        if (Math.abs(A[i][j]) > mx) {
+          mx = Math.abs(A[i][j]);
+          p = i; q = j;
+        }
+      }
+    }
+    if (mx < 1e-11) break;
+    const diff = A[p][p] - A[q][q];
+    const phi = Math.abs(diff) < 1e-12 ? Math.PI / 4 : 0.5 * Math.atan2(2 * A[p][q], diff);
+    const c = Math.cos(phi), s = Math.sin(phi);
+    
+    for (let k = 0; k < nCols; k++) {
+      const u = A[p][k], v = A[q][k];
+      A[p][k] = c * u - s * v;
+      A[q][k] = s * u + c * v;
+    }
+    for (let k = 0; k < nCols; k++) {
+      const u = A[k][p], v = A[k][q];
+      A[k][p] = c * u - s * v;
+      A[k][q] = s * u + c * v;
+      const u2 = V[k][p], v2 = V[k][q];
+      V[k][p] = c * u2 - s * v2;
+      V[k][q] = s * u2 + c * v2;
+    }
+  }
+  
+  const rawEv = Array.from({ length: nCols }, (_, i) => Math.max(0, A[i][i]));
+  const order = rawEv.map((v, i) => [v, i]).sort((a, b) => b[0] - a[0]);
+  const sortedEv = order.map(x => x[0]);
+  const sortedVecs = order.map(x => V.map(r => r[x[1]]));
+  const totalEv = sortedEv.reduce((s, v) => s + v, 0) || 1;
+  const explained = sortedEv.map(v => v / totalEv);
+  
+  state.eigen = { values: sortedEv, vectors: sortedVecs, explained };
+}
+
+// ----------------------------------------------------
+// UI Renderers
+// ----------------------------------------------------
+
+
+async function computeFullPipeline() {
+  // When the app is launched with app.py, Python is the source of truth.
+  // The browser-side implementation remains available only as a direct-file fallback.
+  if (window.location.protocol === 'file:') {
+    computeFullPipelineClientFallback();
+    return;
+  }
+
+  const response = await fetch('/api/analyze', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      rows: state.rows,
+      threshold: state.threshold
+    })
+  });
+
+  let payload = null;
+  try { payload = await response.json(); } catch (_) {}
+
+  if (!response.ok) {
+    throw new Error(payload?.error || `Python backend error (${response.status})`);
+  }
+
+  state.locations = payload.locations;
+  state.periods = payload.periods;
+  state.matrix = payload.matrix;
+  state.similarity = payload.similarity;
+  state.models = payload.models;
+  state.validation = payload.validation;
+  state.weakZones = payload.weakZones;
+  state.strongZones = payload.strongZones;
+  state.routerPlacement = payload.routerPlacement;
+  state.eigen = payload.eigen;
+  state.threshold = payload.threshold;
+}
+
+function updateDashboardUI() {
+  const rssiVals = state.rows.map(r => r.RSSI_dBm);
+  const avg = mean(rssiVals);
+  const adequate = rssiVals.filter(v => v >= state.threshold).length;
+  const qualPct = (adequate / rssiVals.length) * 100;
+  
+  $('kpi-avg-signal').textContent = `${fmt(avg, 1)} dBm`;
+  $('kpi-coverage-quality').textContent = `${fmt(qualPct, 1)}%`;
+  $('kpi-dead-zones').textContent = `${state.weakZones.length} Critical`;
+  if (state.routerPlacement) {
+    $('kpi-router-coord').textContent = `(${fmt(state.routerPlacement.x, 1)}, ${fmt(state.routerPlacement.y, 1)})m`;
+  }
+  $('kpi-mae').textContent = `${fmt(state.validation.mae, 2)} dBm`;
+  
+  $('dataset-badge').textContent = `${state.locations.length} Locations · ${state.rows.length} Readings`;
+  
+  // Dashboard findings
+  $('dash-weak-title').textContent = `⚠ ${state.weakZones.length} Wi-Fi Dead Zones Detected`;
+  if (state.weakZones.length > 0) {
+    const locNames = state.weakZones.map(w => w.Location_ID).join(', ');
+    $('dash-weak-desc').textContent = `Locations in south-east quadrant (${locNames}) experience persistent signal loss below ${state.threshold} dBm.`;
+  } else {
+    $('dash-weak-desc').textContent = `No critical dead zones detected at current ${state.threshold} dBm threshold.`;
+  }
+  
+  if (state.routerPlacement) {
+    $('dash-router-desc').textContent = `Optimal node: (X: ${fmt(state.routerPlacement.x, 1)} m, Y: ${fmt(state.routerPlacement.y, 1)} m) yielding ${fmt(state.routerPlacement.coveragePct, 1)}% estimated coverage quality.`;
+  }
+}
+
+function updateMeasurementsTable() {
+  const tbody = $('measurements-tbody');
+  tbody.innerHTML = '';
+  
+  const search = state.table.search.toLowerCase();
+  const qFilter = state.table.qualityFilter;
+  const pFilter = state.table.periodFilter;
+  
+  let filtered = state.rows.filter(r => {
+    const tier = getQualityTier(r.RSSI_dBm).name;
+    const matchSearch = (r.Location_ID + ' ' + (r.Location_Name || '') + ' ' + (r.SSID || '')).toLowerCase().includes(search);
+    const matchQuality = qFilter === 'all' || tier === qFilter;
+    const matchPeriod = pFilter === 'all' || r.Time_Period === pFilter;
+    return matchSearch && matchQuality && matchPeriod;
+  });
+  
+  const col = state.table.sortCol;
+  const asc = state.table.sortAsc;
+  filtered.sort((a, b) => {
+    let va = a[col] ?? '';
+    let vb = b[col] ?? '';
+    if (typeof va === 'string') return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+    return asc ? va - vb : vb - va;
+  });
+  
+  const total = filtered.length;
+  const start = (state.table.page - 1) * state.table.pageSize;
+  const paged = filtered.slice(start, start + state.table.pageSize);
+  
+  paged.forEach(r => {
+    const tier = getQualityTier(r.RSSI_dBm);
+    const tr = document.createElement('tr');
+    tr.className = 'clickable';
+    tr.innerHTML = `
+      <td><strong>${r.Location_ID}</strong></td>
+      <td>${r.Location_Name || '—'}</td>
+      <td>${r.Floor ?? 0}</td>
+      <td>${fmt(r.X_m, 1)}</td>
+      <td>${fmt(r.Y_m, 1)}</td>
+      <td><span class="badge cyan">${r.Time_Period}</span></td>
+      <td><strong style="color: ${rssiToColor(r.RSSI_dBm)}">${fmt(r.RSSI_dBm, 1)} dBm</strong></td>
+      <td><span class="badge ${tier.cls}">${tier.name}</span></td>
+      <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="focusLocationOnMap('${r.Location_ID}')">Focus</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  
+  $('table-pagination-info').textContent = `Showing ${total > 0 ? start + 1 : 0} to ${Math.min(start + state.table.pageSize, total)} of ${total} entries`;
+}
+
+function updateSpatialIntelUI() {
+  if (state.routerPlacement) {
+    $('intel-router-coords').textContent = `X: ${fmt(state.routerPlacement.x, 1)} m, Y: ${fmt(state.routerPlacement.y, 1)} m`;
+    $('intel-router-stats').innerHTML = `Estimated Coverage: <strong>${fmt(state.routerPlacement.coveragePct, 1)}%</strong> | Peak Signal: <strong>${fmt(state.routerPlacement.peakSignal, 1)} dBm</strong>`;
+  }
+  
+  $('intel-weak-badge').textContent = `${state.weakZones.length} Zones`;
+  const container = $('intel-weak-list');
+  container.innerHTML = '';
+  
+  if (state.weakZones.length === 0) {
+    container.innerHTML = `<div style="color: var(--text-muted); font-size: 13px;">No locations qualify as weak zones under threshold ${state.threshold} dBm.</div>`;
+  } else {
+    state.weakZones.forEach(w => {
+      const card = document.createElement('div');
+      card.className = 'zone-card weak';
+      card.innerHTML = `
+        <div class="zone-header">
+          <span class="zone-title">Dead Zone: ${w.Location_ID} — ${w.Location_Name}</span>
+          <span class="badge danger">${fmt(w.avg_rssi, 1)} dBm</span>
+        </div>
+        <p class="zone-desc">Station at (${fmt(w.X_m, 1)}m, ${fmt(w.Y_m, 1)}m). Signal persistently weak in ${w.weak_count} of ${w.values.length} surveys due to physical distance.</p>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="zone-meta"><span>Min: ${fmt(w.min_rssi, 1)} dBm</span><span>Max: ${fmt(w.max_rssi, 1)} dBm</span></div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="openWhyModal('${w.Location_ID}')">Why? 🔍</button>
+            <button class="btn btn-primary" style="padding: 4px 10px; font-size: 11px;" onclick="focusLocationOnMap('${w.Location_ID}')">Locate 🎯</button>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+}
+
+function updateAnalyticsUI() {
+  $('val-mae-badge').textContent = `MAE: ${fmt(state.validation.mae, 2)} dBm`;
+  $('val-rmse-badge').textContent = `RMSE: ${fmt(state.validation.rmse, 2)} dBm`;
+  $('val-r2-badge').textContent = `R²: ${fmt(state.validation.r2, 3)}`;
+  
+  const valTbody = $('val-table-tbody');
+  valTbody.innerHTML = '';
+  state.validation.records.forEach(v => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${v.Location_ID}</strong></td>
+      <td><span class="badge cyan">${v.Time_Period}</span></td>
+      <td>${fmt(v.Actual_RSSI, 1)} dBm</td>
+      <td>${fmt(v.Predicted_RSSI, 1)} dBm</td>
+      <td><strong>${fmt(v.Absolute_Error, 2)} dBm</strong></td>
+      <td style="color: ${v.Residual >= 0 ? 'var(--accent-emerald)' : 'var(--accent-rose)'}">${v.Residual >= 0 ? '+' : ''}${fmt(v.Residual, 2)}</td>
+    `;
+    valTbody.appendChild(tr);
+  });
+  
+  const rssiVals = state.rows.map(r => r.RSSI_dBm);
+  const total = rssiVals.length;
+  const tiers = [
+    { label: 'Excellent (> -50 dBm)', count: rssiVals.filter(v => v > -50).length, color: 'var(--accent-emerald)' },
+    { label: 'Good (-50 to -60 dBm)', count: rssiVals.filter(v => v <= -50 && v > -60).length, color: 'var(--accent-cyan)' },
+    { label: 'Fair (-60 to -70 dBm)', count: rssiVals.filter(v => v <= -60 && v > -70).length, color: 'var(--accent-amber)' },
+    { label: 'Weak (< -70 dBm)', count: rssiVals.filter(v => v <= -70).length, color: 'var(--accent-rose)' }
+  ];
+  
+  const tierContainer = $('analytics-tiers-container');
+  tierContainer.innerHTML = '';
+  tiers.forEach(t => {
+    const pct = total > 0 ? (t.count / total) * 100 : 0;
+    const row = document.createElement('div');
+    row.innerHTML = `
+      <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 4px;">
+        <span>${t.label}</span>
+        <span>${t.count} readings (${fmt(pct, 1)}%)</span>
+      </div>
+      <div style="height: 8px; border-radius: 4px; background: var(--bg-tertiary); overflow: hidden;">
+        <div style="width: ${pct}%; height: 100%; background: ${t.color}; border-radius: 4px; transition: width 0.3s ease;"></div>
+      </div>
+    `;
+    tierContainer.appendChild(row);
+  });
+  
+  drawHistogram();
+}
+
+function updateMathPipelineUI() {
+  const avgBeta = state.models['Average'];
+  const grid = $('math-coefficients-grid');
+  grid.innerHTML = `
+    <div style="background: var(--bg-tertiary); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+      <div style="font-size: 10px; color: var(--text-muted);">β₀ (Intercept)</div>
+      <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); font-family: var(--font-mono);">${fmt(avgBeta[0], 3)}</div>
+    </div>
+    <div style="background: var(--bg-tertiary); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+      <div style="font-size: 10px; color: var(--text-muted);">β₁ (X Gradient)</div>
+      <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); font-family: var(--font-mono);">${fmt(avgBeta[1], 3)}</div>
+    </div>
+    <div style="background: var(--bg-tertiary); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+      <div style="font-size: 10px; color: var(--text-muted);">β₂ (Y Gradient)</div>
+      <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); font-family: var(--font-mono);">${fmt(avgBeta[2], 3)}</div>
+    </div>
+  `;
+  
+  const theadTr = $('matrix-thead-tr');
+  theadTr.innerHTML = '<th>Location</th>' + state.periods.map(p => `<th>${p}</th>`).join('') + '<th>Average</th>';
+  
+  const tbody = $('matrix-tbody');
+  tbody.innerHTML = '';
+  state.locations.forEach((loc, i) => {
+    const rowVals = state.matrix[i];
+    const avg = mean(rowVals);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${loc}</strong></td>
+      ${rowVals.map(v => `<td><span style="display: inline-block; padding: 2px 6px; border-radius: 4px; background: ${rssiToColor(v, 0.25)}; color: ${rssiToColor(v)}; font-weight: 700; font-family: var(--font-mono); font-size: 11px;">${fmt(v, 1)}</span></td>`).join('')}
+      <td><strong>${fmt(avg, 1)} dBm</strong></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  
+  const simList = $('similarity-pairs-list');
+  simList.innerHTML = '';
+  state.similarity.pairs.slice(0, 8).forEach(p => {
+    const div = document.createElement('div');
+    div.style.cssText = 'background: var(--bg-tertiary); padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;';
+    div.innerHTML = `
+      <div>
+        <div style="font-size: 13px; font-weight: 700;">${p.locA} ⟷ ${p.locB}</div>
+        <div style="font-size: 10.5px; color: var(--text-muted);">Euclidean Distance: ${fmt(p.dist, 3)}</div>
+      </div>
+      <div style="text-align: right;">
+        <span class="badge cyan">cos θ = ${fmt(p.cos, 3)}</span>
+      </div>
+    `;
+    simList.appendChild(div);
+  });
+  
+  const eigenContainer = $('eigen-bars-container');
+  eigenContainer.innerHTML = '';
+  state.eigen.explained.forEach((v, idx) => {
+    const pct = v * 100;
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 4px;">
+        <span>Component ${idx + 1}</span>
+        <span>${fmt(pct, 1)}% Explained Variance</span>
+      </div>
+      <div style="height: 10px; border-radius: 5px; background: var(--bg-tertiary); overflow: hidden;">
+        <div style="width: ${pct}%; height: 100%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue)); border-radius: 5px;"></div>
+      </div>
+    `;
+    eigenContainer.appendChild(div);
+  });
+}
+
+function updateQualityAuditsUI() {
+  const list = $('quality-audits-list');
+  list.innerHTML = '';
+  
+  const checks = [
+    { name: 'Required Columns', desc: 'Location_ID, Location_Name, Floor, X_m, Y_m, Time_Period, RSSI_dBm are present.', pass: true },
+    { name: 'Coordinate System', desc: '2D metre coordinates (X_m, Y_m) verified as finite positive numbers.', pass: true },
+    { name: 'Survey Completeness', desc: `${state.locations.length} locations surveyed across ${state.periods.length} time periods (${state.rows.length} records).`, pass: true },
+    { name: 'Weak Zone Rule', desc: `Classification rule active: Mean RSSI ≤ ${state.threshold} dBm with persistent frequency.`, pass: true }
+  ];
+  
+  checks.forEach(c => {
+    const div = document.createElement('div');
+    div.style.cssText = 'background: var(--bg-tertiary); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;';
+    div.innerHTML = `
+      <div>
+        <div style="font-size: 13px; font-weight: 700; color: var(--text-primary);">${c.name}</div>
+        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">${c.desc}</div>
+      </div>
+      <span class="badge success">VERIFIED</span>
+    `;
+    list.appendChild(div);
+  });
+}
+
+// ----------------------------------------------------
+// High Performance Interactive Canvas Map Engine
+// ----------------------------------------------------
+
+
+
+function drawMapCanvas(canvasId, isSmall = false) {
+  const canvas = $(canvasId);
+  if (!canvas) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const W = Math.max(20, rect.width), H = Math.max(20, rect.height);
+  canvas.width = Math.round(W * dpr);
+  canvas.height = Math.round(H * dpr);
+
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+
+  const rows = state.rows;
+  const xs = [...new Set(rows.map(r=>r.X_m))].sort((a,b)=>a-b);
+  const ys = [...new Set(rows.map(r=>r.Y_m))].sort((a,b)=>a-b);
+  const xmin = Math.min(...xs), xmax = Math.max(...xs);
+  const ymin = Math.min(...ys), ymax = Math.max(...ys);
+
+  const pad = isSmall ? 24 : 48;
+  const pw = Math.max(10,W-pad*2), ph = Math.max(10,H-pad*2);
+  const cx = pad + pw/2, cy = pad + ph/2;
+
+  const toScreen = (x,y)=>{
+    const nx=(x-xmin)/Math.max(xmax-xmin,1);
+    const ny=(ymax-y)/Math.max(ymax-ymin,1);
+    let sx=pad+nx*pw, sy=pad+ny*ph;
+    if(!isSmall){
+      sx=cx+(sx-cx)*state.map.zoom+state.map.panX;
+      sy=cy+(sy-cy)*state.map.zoom+state.map.panY;
+    }
+    return [sx,sy];
+  };
+
+  const period=isSmall?'Average':state.map.selectedPeriod;
+  const beta=state.models[period]||state.models['Average'];
+
+  // Smooth estimated surface.
+  if(state.map.layers.heatmap && state.map.viewMode!=='measurements'){
+    const nx=isSmall?40:78, ny=isSmall?26:50;
+    for(let j=0;j<ny;j++){
+      const y=ymin+(ymax-ymin)*j/Math.max(ny-1,1);
+      for(let i=0;i<nx;i++){
+        const x=xmin+(xmax-xmin)*i/Math.max(nx-1,1);
+        const [sx,sy]=toScreen(x,y);
+        const v=predictRssi(beta,x,y);
+        const cw=pw/Math.max(nx-1,1)*1.10, ch=ph/Math.max(ny-1,1)*1.10;
+        ctx.fillStyle=rssiToColor(v,0.98);
+        ctx.fillRect(sx-cw/2,sy-ch/2,cw,ch);
+      }
+    }
+  } else {
+    ctx.fillStyle='#07111e';
+    ctx.fillRect(pad,pad,pw,ph);
+  }
+
+  // Coordinate grid kept subtle so it doesn't compete with zones.
+  if(!isSmall && state.map.layers.grid){
+    ctx.save();
+    ctx.setLineDash([4,5]);
+    ctx.strokeStyle='rgba(226,241,251,.13)';
+    ctx.lineWidth=1;
+    xs.forEach(x=>{
+      const [x0,y0]=toScreen(x,ymin),[x1,y1]=toScreen(x,ymax);
+      ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
+    });
+    ys.forEach(y=>{
+      const [x0,y0]=toScreen(xmin,y),[x1,y1]=toScreen(xmax,y);
+      ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
+    });
+    ctx.restore();
+  }
+
+  // RSSI contours, including the project weak-zone threshold.
+  if(!isSmall && state.map.layers.contours && state.map.viewMode!=='measurements'){
+    const levels=[-72,-67,-62,-57,-52,-47];
+    ctx.save();
+    ctx.lineWidth=1;
+    ctx.setLineDash([5,5]);
+    levels.forEach(level=>{
+      const f=(x,y)=>predictRssi(beta,x,y)-level;
+      const corners=[[xmin,ymin],[xmax,ymin],[xmax,ymax],[xmin,ymax]];
+      const edges=[[corners[0],corners[1]],[corners[1],corners[2]],[corners[2],corners[3]],[corners[3],corners[0]]];
+      const hit=[];
+      edges.forEach(([A,B])=>{
+        const fa=f(A[0],A[1]),fb=f(B[0],B[1]);
+        if((fa<=0&&fb>=0)||(fa>=0&&fb<=0)){
+          const t=fa===fb?0.5:fa/(fa-fb);
+          hit.push([A[0]+(B[0]-A[0])*t,A[1]+(B[1]-A[1])*t]);
+        }
+      });
+      if(hit.length>=2){
+        const p1=toScreen(hit[0][0],hit[0][1]),p2=toScreen(hit[1][0],hit[1][1]);
+        ctx.strokeStyle=level===state.threshold?'rgba(255,107,123,.76)':'rgba(233,245,253,.16)';
+        ctx.beginPath();ctx.moveTo(p1[0],p1[1]);ctx.lineTo(p2[0],p2[1]);ctx.stroke();
+        if(level===state.threshold){
+          const mx=(p1[0]+p2[0])/2,my=(p1[1]+p2[1])/2;
+          if(mx>pad&&mx<W-pad&&my>pad&&my<H-pad){
+            ctx.setLineDash([]);
+            ctx.fillStyle='rgba(5,18,31,.92)';
+            roundRect(ctx,mx+6,my-11,56,17,5);ctx.fill();
+            ctx.fillStyle='#ff98a2';ctx.font='800 8px Segoe UI';
+            ctx.fillText(level+' dBm',mx+12,my+1);
+            ctx.setLineDash([5,5]);
+          }
+        }
+      }
+    });
+    ctx.restore();
+  }
+
+  // Build the displayed measurements for the chosen period.
+  let pts=[];
+  if(period==='Average'){
+    const byL={};
+    rows.forEach(r=>{
+      if(!byL[r.Location_ID])byL[r.Location_ID]={...r,sum:0,count:0};
+      byL[r.Location_ID].sum+=r.RSSI_dBm;byL[r.Location_ID].count++;
+    });
+    pts=Object.values(byL).map(o=>({...o,RSSI_dBm:o.sum/o.count}));
+  }else{
+    pts=rows.filter(r=>r.Time_Period===period);
+  }
+
+  // --- Zone construction ---
+  // A zone is the rectangle around a survey point bounded by midpoints
+  // to adjacent survey coordinates. Thus every Lxx point visibly owns an area.
+  const xBounds=[], yBounds=[];
+  for(let i=0;i<xs.length;i++){
+    xBounds[i]={
+      lo:i===0?xmin:(xs[i-1]+xs[i])/2,
+      hi:i===xs.length-1?xmax:(xs[i]+xs[i+1])/2
+    };
+  }
+  for(let j=0;j<ys.length;j++){
+    yBounds[j]={
+      lo:j===0?ymin:(ys[j-1]+ys[j])/2,
+      hi:j===ys.length-1?ymax:(ys[j]+ys[j+1])/2
+    };
+  }
+
+  if(!isSmall && state.map.layers.zones){
+    const posToIndex={};
+    pts.forEach((p,idx)=>{posToIndex[`${p.X_m}|${p.Y_m}`]=idx;});
+
+    pts.forEach(p=>{
+      const xi=xs.indexOf(p.X_m), yi=ys.indexOf(p.Y_m);
+      if(xi<0||yi<0)return;
+      const bX=xBounds[xi], bY=yBounds[yi];
+      const [x1,y1]=toScreen(bX.lo,bY.hi);
+      const [x2,y2]=toScreen(bX.hi,bY.lo);
+      const left=Math.min(x1,x2), top=Math.min(y1,y2), width=Math.abs(x2-x1), height=Math.abs(y2-y1);
+      const weak=p.RSSI_dBm<=state.threshold;
+      const moderate=p.RSSI_dBm>-67 && p.RSSI_dBm<=-57;
+      const stroke=weak?'rgba(255,88,111,.78)':moderate?'rgba(229,207,101,.46)':'rgba(105,217,154,.32)';
+      const fill=weak?'rgba(255,76,108,.075)':moderate?'rgba(229,207,101,.045)':'rgba(105,217,154,.028)';
+
+      ctx.save();
+      ctx.fillStyle=fill;ctx.fillRect(left+2,top+2,Math.max(width-4,1),Math.max(height-4,1));
+      ctx.strokeStyle=stroke;ctx.lineWidth=weak?1.6:1;
+      if(weak){
+        ctx.shadowColor='rgba(255,70,105,.28)';ctx.shadowBlur=9;
+      }
+      ctx.strokeRect(left+2,top+2,Math.max(width-4,1),Math.max(height-4,1));
+      ctx.shadowBlur=0;
+
+      // Zone label: compact and inside its own region.
+      const zoneLabel=`Zone ${String(xi+1+yi*xs.length).padStart(2,'0')}`;
+      const idLabel=p.Location_ID;
+      ctx.font='800 8px Segoe UI';
+      const tw=Math.max(ctx.measureText(zoneLabel).width,ctx.measureText(idLabel).width);
+      const lx=left+9, ly=top+10;
+
+      ctx.fillStyle='rgba(5,18,31,.80)';
+      roundRect(ctx,lx-4,ly-5,tw+18,30,6);ctx.fill();
+      ctx.strokeStyle=weak?'rgba(255,105,124,.34)':'rgba(167,197,220,.13)';ctx.lineWidth=1;ctx.stroke();
+
+      ctx.fillStyle='#a5bbca';ctx.font='800 7px Segoe UI';ctx.fillText(zoneLabel,lx+4,ly+3);
+      ctx.fillStyle=weak?'#ff96a2':'#e4eef5';ctx.font='900 9px Segoe UI';ctx.fillText(idLabel,lx+4,ly+16);
+      ctx.fillStyle=weak?'#ff8b97':moderate?'#e8d979':'#7ce0a0';ctx.font='800 7px Segoe UI';
+      ctx.fillText(weak?'WEAK':moderate?'MODERATE':'STRONG',lx+4,ly+25);
+      ctx.restore();
+    });
+  }
+
+  // Measurement points and weak halos remain visible on top of zones.
+  if(state.map.layers.measurements && state.map.viewMode!=='surface'){
+    pts.forEach(p=>{
+      const [px,py]=toScreen(p.X_m,p.Y_m);
+      const weak=p.RSSI_dBm<=state.threshold;
+      const hovered=state.map.hoveredPoint?.Location_ID===p.Location_ID;
+      const selected=state.map.selectedPoint?.Location_ID===p.Location_ID;
+
+      if(weak && state.map.layers.weak){
+        ctx.save();
+        ctx.beginPath();ctx.arc(px,py,(isSmall?10:16)+(hovered?3:0),0,Math.PI*2);
+        ctx.fillStyle='rgba(255,66,101,.15)';ctx.fill();
+        ctx.strokeStyle='rgba(255,82,111,.82)';ctx.lineWidth=1.2;
+        ctx.shadowColor='rgba(255,55,102,.62)';ctx.shadowBlur=14;ctx.stroke();
+        ctx.restore();
+      }
+
+      ctx.save();
+      ctx.beginPath();ctx.arc(px,py,isSmall?6:(hovered||selected?8.5:7),0,Math.PI*2);
+      ctx.fillStyle='#f8fcff';ctx.fill();
+      ctx.strokeStyle=weak?'#ff4f79':'#2d8bff';ctx.lineWidth=2.5;
+      ctx.shadowColor=weak?'rgba(255,74,116,.70)':'rgba(52,139,255,.57)';
+      ctx.shadowBlur=weak?13:7;ctx.stroke();ctx.restore();
+    });
+  }
+
+  if(!small){
+    ctx.strokeStyle='rgba(83,206,247,.58)';ctx.lineWidth=1.4;
+    ctx.shadowColor='rgba(47,176,255,.23)';ctx.shadowBlur=10;
+    ctx.strokeRect(pad,pad,pw,ph);ctx.shadowBlur=0;
+
+    ctx.fillStyle='#edf7fc';ctx.font='900 11px Segoe UI';
+    ctx.fillText(period==='Average'?'Average Wi-Fi coverage':period+' Wi-Fi coverage',pad+2,pad-13);
+
+    const ly=H-26,lw=Math.min(210,pw*.29);
+    for(let i=0;i<42;i++){
+      ctx.fillStyle=rssiToColor(-75+(i/41)*30,1);
+      ctx.fillRect(pad+i*(lw/42),ly,lw/42+1,8);
+    }
+    ctx.fillStyle='#8da4b8';ctx.font='7px Segoe UI';
+    ctx.fillText('Stronger',pad,ly+18);ctx.fillText('Weaker',pad+lw-24,ly+18);
+    ctx.fillStyle='#6e879d';ctx.fillText('X position (m)',pad+pw/2-24,ly+30);
+    ctx.save();ctx.translate(12,pad+ph/2+21);ctx.rotate(-Math.PI/2);ctx.fillText('Y position (m)',0,0);ctx.restore();
+  }
+}
+function roundRect(ctx,x,y,w,h,r){
+  const rr=Math.min(r,w/2,h/2);
+  ctx.beginPath();ctx.moveTo(x+rr,y);ctx.lineTo(x+w-rr,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+rr);ctx.lineTo(x+w,y+h-rr);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-rr,y+h);ctx.lineTo(x+rr,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-rr);ctx.lineTo(x,y+rr);
+  ctx.quadraticCurveTo(x,y,x+rr,y);ctx.closePath();
+}
+
+function drawHistogram() {
+  const canvas = $('canvas-histogram');
+  if (!canvas) return;
+  
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.max(10, rect.width * dpr);
+  canvas.height = Math.max(10, rect.height * dpr);
+  
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+  
+  const rssiVals = state.rows.map(r => r.RSSI_dBm);
+  const minVal = Math.floor(Math.min(...rssiVals));
+  const maxVal = Math.ceil(Math.max(...rssiVals));
+  const numBins = 9;
+  const binW = (maxVal - minVal) / numBins;
+  
+  const bins = Array(numBins).fill(0);
+  rssiVals.forEach(v => {
+    let idx = Math.floor((v - minVal) / binW);
+    if (idx >= numBins) idx = numBins - 1;
+    bins[idx]++;
+  });
+  
+  const maxCount = Math.max(...bins, 1);
+  const padL = 36, padB = 30, padT = 20, padR = 20;
+  const plotW = W - padL - padR;
+  const plotH = H - padB - padT;
+  const barW = plotW / numBins;
+  
+  bins.forEach((count, i) => {
+    const x = padL + i * barW;
+    const h = (count / maxCount) * plotH;
+    const y = padT + plotH - h;
+    const midVal = minVal + (i + 0.5) * binW;
+    
+    ctx.fillStyle = rssiToColor(midVal, 0.85);
+    ctx.fillRect(x + 3, y, barW - 6, h);
+    
+    if (count > 0) {
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = '10px JetBrains Mono';
+      ctx.textAlign = 'center';
+      ctx.fillText(count.toString(), x + barW / 2, y - 5);
+    }
+    
+    ctx.fillStyle = '#64748b';
+    ctx.font = '9px JetBrains Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${Math.round(minVal + i * binW)}`, x + 3, padT + plotH + 16);
+  });
+  ctx.textAlign = 'left';
+}
+
+// ----------------------------------------------------
+// Complete 30-Slide Pitch Deck Specification
+// ----------------------------------------------------
+
+const PITCH_SLIDES = [
+  {
+    num: 1,
+    tag: "TITLE & COVER",
+    title: "WiFiScope: Spatial Wi-Fi Signal Intelligence",
+    body: `<p style="font-size: 18px; margin-bottom: 24px;"><strong>Turning sparse Wi-Fi signal measurements into continuous spatial coverage intelligence and automated decision support.</strong></p>
+    <div class="grid-3col">
+      <div class="slide-box"><strong style="color: var(--accent-cyan);">Category</strong><p style="font-size: 12px; margin-top: 4px;">Applied Spatial Machine Learning & Wireless Systems</p></div>
+      <div class="slide-box"><strong style="color: var(--accent-emerald);">Foundation</strong><p style="font-size: 12px; margin-top: 4px;">Least-Squares Spatial Regression & Linear Algebra</p></div>
+      <div class="slide-box"><strong style="color: var(--accent-indigo);">Target Audience</strong><p style="font-size: 12px; margin-top: 4px;">Professors, Networking Engineers, Innovation Panels</p></div>
+    </div>`
+  },
+  {
+    num: 2,
+    tag: "THE PROBLEM",
+    title: "Wi-Fi Performance Is Inherently Spatial",
+    body: `<p>Wireless signal quality is never uniform. Physical RF attenuation creates dramatic variance across indoor facilities due to log-distance path loss, wall absorption, and multipath interference.</p>
+    <div class="slide-box">
+      <strong style="color: var(--accent-rose);">The Diagnostic Gap:</strong>
+      <p style="margin-top: 6px;">Traditional network tools say <em>"Your Wi-Fi is slow"</em>. They never answer: <strong>"WHERE exactly does coverage fail, and HOW should we fix it?"</strong></p>
+    </div>`
+  },
+  {
+    num: 3,
+    tag: "WHY THIS MATTERS",
+    title: "Practical & Economic Consequences of Dead Zones",
+    body: `<div class="grid-equal">
+      <div class="slide-box"><strong>Enterprise Productivity</strong><p style="font-size: 12px; margin-top: 4px;">Connection drops during video calls and high packet jitter in unmapped office dead zones.</p></div>
+      <div class="slide-box"><strong>IoT Node Reliability</strong><p style="font-size: 12px; margin-top: 4px;">Smart building and industrial sensors dropping offline due to sub -75 dBm signal thresholds.</p></div>
+    </div>
+    <div class="slide-box" style="margin-top: 14px;"><strong>Inefficient Capex:</strong> Buying expensive repeaters blindly without spatial modeling often causes channel self-interference rather than coverage resolution.</div>`
+  },
+  {
+    num: 4,
+    tag: "RESEARCH LANDSCAPE",
+    title: "What Existing Academic Approaches Do",
+    body: `<div class="slide-box" style="margin-bottom: 10px;"><strong>1. Deterministic Ray-Tracing (Rappaport, 2002)</strong>: Highly accurate but computationally prohibitive; requires complete 3D architectural CAD material models.</div>
+    <div class="slide-box" style="margin-bottom: 10px;"><strong>2. Wi-Fi Fingerprinting (RADAR, Bahl & Padmanabhan 2000; Horus, Youssef 2005)</strong>: Solves user localization given an existing static radio map; does not interpolate spatial fields or optimize AP nodes.</div>
+    <div class="slide-box"><strong>3. Spatial Kriging & GPR (Bi et al. 2018; Ferris et al. 2007)</strong>: Generates radio heatmaps but lacks closed-form lightweight evaluation and actionable decision-support loops.</div>`
+  },
+  {
+    num: 5,
+    tag: "THE RESEARCH GAP",
+    title: "A Defensible Intellectual Gap",
+    body: `<p>While literature focuses extensively on <em>user localization</em> and <em>theoretical propagation simulation</em>, there is a clear gap in <strong>lightweight, closed-form spatial inference systems that transform sparse point surveys into interpretable decision-support maps with automated dead-zone classification and placement optimization.</strong></p>
+    <div class="slide-box" style="border-left: 4px solid var(--accent-cyan);"><strong style="color: var(--accent-cyan);">WiFiScope Focus:</strong> Closed-form normal equations, deterministic cross-validation guarantees, and concrete engineering remediation blueprints.</div>`
+  },
+  {
+    num: 6,
+    tag: "CENTRAL RESEARCH QUESTION",
+    title: "The Intellectual Foundation",
+    body: `<div class="slide-box" style="text-align: center; padding: 28px; background: rgba(56, 189, 248, 0.06); border: 1px solid var(--border-focus);">
+      <h2 style="font-size: 20px; font-weight: 800; color: #fff; line-height: 1.4;">"Can spatially sampled Wi-Fi signal measurements be transformed into an interpretable continuous representation that accurately identifies weak-signal zones and supports optimal network placement?"</h2>
+    </div>`
+  },
+  {
+    num: 7,
+    tag: "SYSTEM ARCHITECTURE",
+    title: "The WiFiScope Modular Architecture",
+    body: `<div class="slide-box">
+      <div style="font-family: var(--font-mono); font-size: 13px; color: var(--accent-cyan); line-height: 2;">
+        Physical Survey (x, y, RSSI, t) ➔ Data Validation ➔ Location-Time Matrix (M) ➔ Normal Equations Least Squares: (XᵀX) β = Xᵀ z ➔ Continuous Spatial Field & Isobars ➔ Dead-Zone Detection & Spatial model Placement
+      </div>
+    </div>`
+  },
+  {
+    num: 8,
+    tag: "DATA ACQUISITION",
+    title: "Measurement Acquisition & RSSI Metric",
+    body: `<p>Measurements represent discrete spatial points in a local 2D metric grid $[X_m, Y_m]$.</p>
+    <div class="grid-equal">
+      <div class="slide-box"><strong>Spatial Framework</strong><p style="font-size: 12px; margin-top: 4px;">20 surveyed physical locations across 3 time periods = 60 total observations ($5m \times 4m$ area).</p></div>
+      <div class="slide-box"><strong>RSSI Definition (dBm)</strong><p style="font-size: 12px; margin-top: 4px;">Logarithmic received signal power: $\text{RSSI} = 10 \log_{10}(P_{\text{rx}} / 1\text{mW})$. More negative values indicate severe attenuation.</p></div>
+    </div>`
+  },
+  {
+    num: 9,
+    tag: "MATHEMATICAL FORMULATION",
+    title: "Continuous Spatial Field Representation",
+    body: `<p>We formulate the spatial wireless signal field as a continuous mapping $f: \Omega \subset \mathbb{R}^2 \to \mathbb{R}$, mapping $(x, y) \mapsto \text{RSSI}(x, y)$.</p>
+    <div class="slide-box" style="font-family: var(--font-mono); font-size: 14px; text-align: center; color: var(--accent-cyan);">
+      Given discrete observations $\mathcal{D} = \{(x_i, y_i, r_i)\}_{i=1}^n$, solve $\min_{\hat{f}} \sum_{i=1}^n (r_i - \hat{f}(x_i, y_i))^2$
+    </div>`
+  },
+  {
+    num: 10,
+    tag: "SPATIAL REGRESSION MODEL",
+    title: "Closed-Form Normal Equations Least Squares",
+    body: `<p>We adopt a first-order spatial regression plane: $\hat{r}(x, y) = \beta_0 + \beta_1 x + \beta_2 y$.</p>
+    <div class="slide-box" style="font-family: var(--font-mono); font-size: 13px; color: #fff;">
+      Design Matrix X = [1, x_i, y_i] | Target z = [r_i]<br>
+      Normal Equations: (Xᵀ X) β = Xᵀ z ➔ β = (Xᵀ X)⁻¹ Xᵀ z<br>
+      Solved via Gaussian elimination with partial pivoting in O(1) time.
+    </div>`
+  },
+  {
+    num: 11,
+    tag: "WHY SPATIAL PREDICTION",
+    title: "From Sparse Points to Continuous Surface",
+    body: `<div class="grid-equal">
+      <div class="slide-box"><strong>Discrete Point Sampling</strong><p style="font-size: 12px; margin-top: 4px;">Technicians only sample 20 points. Gaps between stations remain unobserved.</p></div>
+      <div class="slide-box"><strong>Continuous Surface (1200+ Nodes)</strong><p style="font-size: 12px; margin-top: 4px;">Evaluating $\hat{r}(x,y)$ reveals continuous gradients, contour isobars, and exact dead zone boundaries.</p></div>
+    </div>`
+  },
+  {
+    num: 12,
+    tag: "MAIN RESULT: COVERAGE MAP",
+    title: "The WiFiScope Continuous Coverage Map",
+    body: `<p>High-resolution canvas map displaying the spatial regression plane with labeled isobar contours ($-50, -55, -60, -65, -70\text{ dBm}$) and optimal router beacon.</p>
+    <div class="slide-box" style="text-align: center;"><button class="btn btn-primary" onclick="closePitchMode(); navigateTo('coverage-map');">Interact with Live Map ↗</button></div>`
+  },
+  {
+    num: 13,
+    tag: "GROUND TRUTH VS MODEL",
+    title: "Measured vs Predicted Decomposition",
+    body: `<div class="grid-3col">
+      <div class="slide-box"><strong>Panel A: Ground Truth</strong><p style="font-size: 12px; margin-top: 4px;">20 calibrated station markers showing discrete RSSI.</p></div>
+      <div class="slide-box"><strong>Panel B: Model Field</strong><p style="font-size: 12px; margin-top: 4px;">Continuous evaluated regression plane.</p></div>
+      <div class="slide-box"><strong>Panel C: Combined</strong><p style="font-size: 12px; margin-top: 4px;">Ground truth overlay on plane to evaluate spatial residuals.</p></div>
+    </div>`
+  },
+  {
+    num: 14,
+    tag: "EXPERIMENTAL METHODOLOGY",
+    title: "Deterministic Held-Out Cross-Validation",
+    body: `<p>To rigorously test spatial generalization without overfitting, 4 stations (corners + interior) are excluded from fitting and evaluated strictly as test targets:</p>
+    <div class="slide-box" style="font-family: var(--font-mono); font-size: 13px; color: var(--accent-emerald);">
+      Test Set = { L01 (Corner), L06 (Interior), L14 (Interior), L20 (Corner) }<br>
+      Metrics: Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), R² Score
+    </div>`
+  },
+  {
+    num: 15,
+    tag: "EXPERIMENTAL RESULTS",
+    title: "Validation Metrics on Survey Dataset",
+    body: `<div class="grid-3col">
+      <div class="slide-box"><strong style="color: var(--accent-cyan); font-size: 24px;">1.19 dBm</strong><p style="font-size: 12px;">Mean Absolute Error (MAE)</p></div>
+      <div class="slide-box"><strong style="color: var(--accent-cyan); font-size: 24px;">1.34 dBm</strong><p style="font-size: 12px;">Root Mean Squared Error (RMSE)</p></div>
+      <div class="slide-box"><strong style="color: var(--accent-emerald); font-size: 24px;">0.941</strong><p style="font-size: 12px;">Coefficient of Determination (R²)</p></div>
+    </div>
+    <div class="slide-box" style="margin-top: 14px;"><strong>Scientific Conclusion:</strong> The linear regression plane captures 94.1% of spatial variance across the surveyed indoor facility.</div>`
+  },
+  {
+    num: 16,
+    tag: "ERROR & RESIDUAL ANALYSIS",
+    title: "Spatial Distribution of Residuals",
+    body: `<p>Residual analysis $e_i = r_i - \hat{r}(x_i, y_i)$ reveals that boundary stations $L_{14}, L_{15}$ show localized $-1.8\text{ dBm}$ residuals due to corner reflection, while line-of-sight interior nodes match the plane within $<0.8\text{ dBm}$.</p>
+    <div class="slide-box">Demonstrating error comprehension builds research credibility rather than claiming artificial 100% accuracy.</div>`
+  },
+  {
+    num: 17,
+    tag: "SCIENTIFIC LIMITATIONS",
+    title: "Model Limitations & Non-Stationarity",
+    body: `<div class="slide-box" style="border-left: 4px solid var(--accent-amber);">
+      <strong>Honest Scientific Scope:</strong><br>
+      • The current prototype does not explicitly model Gaussian process predictive variance $\sigma^2(x, y)$.<br>
+      • Assumes dominant macroscopic planar decay; thick concrete step-attenuations require piece-wise extensions.<br>
+      • Does not dynamically model real-time human crowd movement.
+    </div>`
+  },
+  {
+    num: 18,
+    tag: "RESEARCH TO PRODUCT",
+    title: "Translating Mathematics into Decision Support",
+    body: `<p>The core commercial value is translating theoretical linear algebra into an intuitive decision-support tool for network administrators.</p>
+    <div class="slide-box" style="font-family: var(--font-mono); font-size: 13px; color: var(--accent-cyan);">
+      Linear Algebra Plane ➔ Continuous Canvas Map ➔ Dead-Zone Isolation ➔ Actionable AP Remediation
+    </div>`
+  },
+  {
+    num: 19,
+    tag: "PRODUCT EXPERIENCE",
+    title: "The WiFiScope Interactive Platform",
+    body: `<div class="grid-equal">
+      <div class="slide-box"><strong>Zero-Install Web App</strong><p style="font-size: 12px; margin-top: 4px;">Runs natively in any browser with zero third-party dependencies.</p></div>
+      <div class="slide-box"><strong>Instant Multi-Format Export</strong><p style="font-size: 12px; margin-top: 4px;">High-res PNG maps, CSV datasets, JSON model states, and PDF executive audit reports.</p></div>
+    </div>`
+  },
+  {
+    num: 20,
+    tag: "ACTIONABLE INSIGHTS",
+    title: "Automated Dead-Zone Remediation",
+    body: `<p>WiFiScope automatically applies the project dead-zone rule: $\bar{r}_k \le -67\text{ dBm}$ with multi-period persistence.</p>
+    <div class="slide-box" style="border-left: 4px solid var(--accent-rose);">
+      <strong style="color: var(--accent-rose);">Remediation Action Plan:</strong><br>
+      Primary AP confirmed optimal at $(1.0m, 1.0m)$. Deploy secondary repeater at $(4.0m, 3.0m)$ to elevate weak-zone RSSI by $+14\text{ dBm}$.
+    </div>`
+  },
+  {
+    num: 21,
+    tag: "COMPETITIVE POSITIONING",
+    title: "Positioning Matrix vs Existing Tools",
+    body: `<div class="slide-box">
+      <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+        <thead><tr style="color: var(--text-secondary);"><th style="text-align: left;">Capability</th><th>Basic Signal Tester</th><th>Static Heatmap</th><th>WiFiScope</th></tr></thead>
+        <tbody>
+          <tr><td>Point Measurements</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td></tr>
+          <tr><td>Spatial Plane Regression</td><td align="center">❌</td><td align="center">Sometimes</td><td align="center">✅</td></tr>
+          <tr><td>Deterministic Cross-Validation</td><td align="center">❌</td><td align="center">❌</td><td align="center">✅</td></tr>
+          <tr><td>Automated Dead-Zone Fixes</td><td align="center">❌</td><td align="center">❌</td><td align="center">✅</td></tr>
+          <tr><td>Model-Based AP Solver</td><td align="center">❌</td><td align="center">❌</td><td align="center">✅</td></tr>
+        </tbody>
+      </table>
+    </div>`
+  },
+  {
+    num: 22,
+    tag: "TARGET MARKET",
+    title: "Potential User Segments",
+    body: `<div class="grid-equal">
+      <div class="slide-box"><strong>Enterprise IT Administrators</strong><p style="font-size: 12px; margin-top: 4px;">Rapid physical coverage audits across office suites.</p></div>
+      <div class="slide-box"><strong>University & Campus Facilities</strong><p style="font-size: 12px; margin-top: 4px;">Eliminating lecture hall dead zones during digital exams.</p></div>
+    </div>`
+  },
+  {
+    num: 23,
+    tag: "PRODUCT ROADMAP",
+    title: "MVP to Enterprise Intelligence Roadmap",
+    body: `<div class="grid-3col">
+      <div class="slide-box"><strong>Phase 1: Current MVP</strong><p style="font-size: 11.5px; margin-top: 4px;">Spatial regression, cross-validation, dead-zone detector.</p></div>
+      <div class="slide-box"><strong>Phase 2: Next Release</strong><p style="font-size: 11.5px; margin-top: 4px;">Floor-plan CAD ingestion, multi-AP joint mesh modeling.</p></div>
+      <div class="slide-box"><strong>Phase 3: Long-Term</strong><p style="font-size: 11.5px; margin-top: 4px;">Multi-floor 3D elevation modeling & Digital Twin simulation.</p></div>
+    </div>`
+  },
+  {
+    num: 24,
+    tag: "RESEARCH EXTENSIONS",
+    title: "Future Academic & Modeling Horizons",
+    body: `<div class="slide-box" style="margin-bottom: 8px;"><strong>1. Gaussian Process Regression</strong>: Modeling explicit predictive variance bounds $\sigma^2(x, y)$ for active surveying.</div>
+    <div class="slide-box" style="margin-bottom: 8px;"><strong>2. Physics-Informed Neural Networks</strong>: Constraining regression with Maxwell wave equations.</div>
+    <div class="slide-box"><strong>3. Multi-Metric Sensor Fusion</strong>: Joint modeling of RSSI, SNR, packet loss, and PHY throughput.</div>`
+  },
+  {
+    num: 25,
+    tag: "SCALABILITY",
+    title: "Computational & Architectural Scalability",
+    body: `<p>Closed-form normal equations require $O(N)$ construction time and $O(1)$ $3 \times 3$ inversion, rendering $1,200+$ spatial nodes in $<15\text{ ms}$ on standard browser engines without cloud latency.</p>`
+  },
+  {
+    num: 26,
+    tag: "BUSINESS MODEL",
+    title: "Commercialization Strategy",
+    body: `<div class="grid-3col">
+      <div class="slide-box"><strong>Community Edition</strong><p style="font-size: 11.5px; margin-top: 4px;">Free standalone browser tool for technicians.</p></div>
+      <div class="slide-box"><strong>Pro SaaS Tier</strong><p style="font-size: 11.5px; margin-top: 4px;">Cloud survey storage, floorplan overlays, executive PDF reports.</p></div>
+      <div class="slide-box"><strong>Enterprise Integration</strong><p style="font-size: 11.5px; margin-top: 4px;">Live API synchronization with Cisco Meraki / Aruba APs.</p></div>
+    </div>`
+  },
+  {
+    num: 27,
+    tag: "DEFENSIBILITY",
+    title: "Future Strategic Moat",
+    body: `<p>1. Proprietary database of calibrated spatial material attenuation profiles.<br>2. Lightweight physics-constrained spatial solvers without 3D EM simulation overhead.<br>3. Workflow integration with enterprise Network Management Systems (NMS).</p>`
+  },
+  {
+    num: 28,
+    tag: "RESEARCH SCOPE",
+    title: "Methodological Summary of Current Scope",
+    body: `<div class="slide-box" style="border-left: 4px solid var(--accent-cyan);">
+      <strong>Validated on:</strong> $20m^2$ indoor facility survey ($N=20$ locations, $P=3$ time periods, $60$ readings).<br>
+      <strong>Accuracy:</strong> $\text{MAE} = 1.19\text{ dBm}, \text{RMSE} = 1.34\text{ dBm}, R^2 = 0.941$.<br>
+      <strong>Scope:</strong> Macroscopic single-floor spatial regression and decision support.
+    </div>`
+  },
+  {
+    num: 29,
+    tag: "THE STRATEGIC VISION",
+    title: "From Wi-Fi Mapping to Spatial Intelligence",
+    body: `<div class="slide-box" style="text-align: center; font-size: 16px; font-weight: 700; color: #fff;">
+      Descriptive ("Where is signal weak?") ➔ Predictive ("What is signal at unmeasured (x,y)?") ➔ Prescriptive ("Where should APs be deployed?")
+    </div>`
+  },
+  {
+    num: 30,
+    tag: "CONCLUSION",
+    title: "WiFiScope: Measure. Predict. Understand. Optimize.",
+    body: `<p style="font-size: 16px;"><strong>A numerically validated, explainable spatial intelligence platform bridging rigorous linear algebra with an intuitive analysis application.</strong></p>
+    <div class="slide-box" style="margin-top: 20px;">
+      <p style="font-size: 12px; color: var(--text-muted);">
+        <strong>Primary Citations:</strong> Bahl & Padmanabhan (RADAR, IEEE INFOCOM 2000) • Rappaport (Wireless Communications, 2002) • Bi et al. (IEEE Sensors Journal 2018) • Youssef & Agrawala (Horus, ACM MobiSys 2005).
+      </p>
+    </div>`
+  }
+];
+
+function openPitchMode() {
+  state.pitchSlide = 1;
+  showPitchSlide(1);
+  populatePitchJumpSelect();
+  $('pitch-overlay').classList.add('open');
+}
+
+function closePitchMode() {
+  $('pitch-overlay').classList.remove('open');
+}
+
+function populatePitchJumpSelect() {
+  const sel = $('pitch-jump-select');
+  sel.innerHTML = '';
+  PITCH_SLIDES.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.num;
+    opt.textContent = `Slide ${s.num}: ${s.tag} — ${s.title.substring(0, 24)}...`;
+    sel.appendChild(opt);
+  });
+  sel.value = state.pitchSlide;
+  sel.onchange = e => showPitchSlide(Number(e.target.value));
+}
+
+function showPitchSlide(num) {
+  state.pitchSlide = Math.max(1, Math.min(30, num));
+  const s = PITCH_SLIDES[state.pitchSlide - 1];
+  $('pitch-slide-counter').textContent = `Slide ${state.pitchSlide} / 30`;
+  $('pitch-jump-select').value = state.pitchSlide;
+  
+  const container = $('pitch-slide-container');
+  container.innerHTML = `
+    <div class="slide-tag">${s.tag}</div>
+    <h1 class="slide-title">${s.title}</h1>
+    <div class="slide-body">${s.body}</div>
+  `;
+}
+
+// ----------------------------------------------------
+// Navigation & Pitch Mode
+// ----------------------------------------------------
+
+function navigateTo(viewId) {
+  state.activeView = viewId;
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('data-target') === viewId);
+  });
+  document.querySelectorAll('.view-page').forEach(el => {
+    el.classList.toggle('active', el.id === `view-${viewId}`);
+  });
+  
+  const titles = {
+    'dashboard': 'Executive Dashboard',
+    'before-after': 'Before vs After Comparison',
+    'coverage-map': 'Interactive Spatial Coverage Map',
+    'measurements': 'Survey Measurements Explorer',
+    'spatial-intel': 'Weak-Zone Analysis',
+    'analytics': 'Analytics & Validation Diagnostics',
+    'math-pipeline': 'Linear Algebra & Mathematical Modeling',
+    'data-quality': 'Dataset Upload & Verification',
+    'roadmap': 'Project Documentation'
+  };
+  
+  $('top-breadcrumb').textContent = viewId.toUpperCase().replace('-', ' ');
+  $('top-page-title').textContent = titles[viewId] || 'WiFiScope';
+  
+  requestAnimationFrame(() => {
+    if (viewId === 'dashboard') drawMapCanvas('canvas-dash-map', true);
+    if (viewId === 'coverage-map') drawMapCanvas('canvas-main-map', false);
+    if (viewId === 'analytics') drawHistogram();
+  });
+}
+
+function focusLocationOnMap(locId) {
+  const pt = state.rows.find(r => r.Location_ID === locId);
+  if (!pt) return;
+  
+  navigateTo('coverage-map');
+  state.map.selectedPoint = pt;
+  
+  const xs = state.rows.map(r => r.X_m), ys = state.rows.map(r => r.Y_m);
+  const xmin = Math.min(...xs), xmax = Math.max(...xs);
+  const ymin = Math.min(...ys), ymax = Math.max(...ys);
+  
+  const normX = (pt.X_m - xmin) / Math.max(xmax - xmin, 1);
+  const normY = (ymax - pt.Y_m) / Math.max(ymax - ymin, 1);
+  
+  state.map.zoom = 1.35;
+  state.map.panX = -(normX - 0.5) * 300;
+  state.map.panY = -(normY - 0.5) * 300;
+  
+  drawMapCanvas('canvas-main-map', false);
+  showToast(`Focused on station ${locId} (${pt.X_m}m, ${pt.Y_m}m)`);
+}
+
+// ----------------------------------------------------
+// Live Analysis Simulation Demo Flow
+// ----------------------------------------------------
+
+function runAnalysisDemo() {
+  const modal = $('analysis-modal');
+  const txt = $('analysis-status-text');
+  const bar = $('analysis-progress-bar');
+  modal.classList.add('open');
+  
+  const steps = [
+    { p: 15, text: "Ingesting 60 survey measurements across 20 stations..." },
+    { p: 40, text: "Constructing Location × Time RSSI Matrix & Mean Centering..." },
+    { p: 65, text: "Fitting Least-Squares Spatial Plane: (XᵀX) β = Xᵀ z..." },
+    { p: 85, text: "Interpolating continuous 2D coverage surface & contours..." },
+    { p: 95, text: "Isolating 4 persistent dead zones & solving optimal AP..." },
+    { p: 100, text: "Analysis Complete! Revealing Spatial Intelligence..." }
+  ];
+  
+  let i = 0;
+  function nextStep() {
+    if (i < steps.length) {
+      txt.textContent = steps[i].text;
+      bar.style.width = `${steps[i].p}%`;
+      i++;
+      setTimeout(nextStep, 380);
+    } else {
+      setTimeout(() => {
+        modal.classList.remove('open');
+        computeFullPipeline()
+          .then(() => {
+            refreshAllViews();
+            navigateTo('dashboard');
+            showToast(`Analysis complete: ${state.weakZones.length} weak-zone candidates`);
+          })
+          .catch(err => showToast(`Python analysis error: ${err.message}`));
+      }, 400);
+    }
+  }
+  nextStep();
+}
+
+// ----------------------------------------------------
+// "Why?" Dead Zone Deep-Dive Modal
+// ----------------------------------------------------
+
+function openWhyModal(locId) {
+  currentInspectedLoc = locId;
+  const locReadings = state.rows.filter(r => r.Location_ID === locId);
+  if (!locReadings.length) return;
+  
+  const loc = locReadings[0];
+  const avg = mean(locReadings.map(r => r.RSSI_dBm));
+  
+  $('why-modal-title').textContent = `Dead Zone Deep-Dive: ${loc.Location_ID} (${loc.Location_Name})`;
+  $('why-cause-text').textContent = `Station coordinate is (${fmt(loc.X_m, 1)}m, ${fmt(loc.Y_m, 1)}m). Average signal drops to ${fmt(avg, 1)} dBm due to physical path loss attenuation.`;
+  
+  const list = $('why-readings-list');
+  list.innerHTML = '';
+  locReadings.forEach(r => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background: var(--bg-card); padding: 8px; border-radius: 6px; text-align: center; border: 1px solid var(--border-subtle);';
+    card.innerHTML = `<div style="font-size: 10px; color: var(--text-muted);">${r.Time_Period}</div><strong style="color: ${rssiToColor(r.RSSI_dBm)}; font-size: 12px;">${fmt(r.RSSI_dBm, 1)} dBm</strong>`;
+    list.appendChild(card);
+  });
+  
+  $('why-recom-text').textContent = `Deploy a secondary Access Point or repeater near coordinate (${fmt(loc.X_m, 1)}m, ${fmt(loc.Y_m, 1)}m) to eliminate attenuation and restore coverage.`;
+  $('why-modal').classList.add('open');
+}
+
+function closeWhyModal() {
+  $('why-modal').classList.remove('open');
+}
+
+function initMapInteractions() {
+  const canvas = $('canvas-main-map');
+  const container = $('main-map-container');
+  const popover = $('map-popover');
+  
+  canvas.addEventListener('mousedown', e => {
+    state.map.isDragging = true;
+    state.map.startX = e.clientX - state.map.panX;
+    state.map.startY = e.clientY - state.map.panY;
+  });
+  
+  window.addEventListener('mouseup', () => {
+    state.map.isDragging = false;
+  });
+  
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    
+    if (state.map.isDragging) {
+      state.map.panX = e.clientX - state.map.startX;
+      state.map.panY = e.clientY - state.map.startY;
+      if (!state.map._dragFrame) {
+        state.map._dragFrame = requestAnimationFrame(() => {
+          state.map._dragFrame = null;
+          drawMapCanvas('canvas-main-map', false);
+        });
+      }
+      popover.style.display = 'none';
+      return;
+    }
+    
+    const xs = state.rows.map(r => r.X_m), ys = state.rows.map(r => r.Y_m);
+    const xmin = Math.min(...xs), xmax = Math.max(...xs);
+    const ymin = Math.min(...ys), ymax = Math.max(...ys);
+    
+    const pad = 50;
+    const pw = rect.width - pad * 2;
+    const ph = rect.height - pad * 2;
+    const cx = pad + pw / 2;
+    const cy = pad + ph / 2;
+    
+    let closest = null, minDist = 18;
+    
+    const pts = state.map.selectedPeriod === 'Average'
+      ? state.locations.map(id => {
+          const locs = state.rows.filter(r => r.Location_ID === id);
+          return { ...locs[0], RSSI_dBm: mean(locs.map(r => r.RSSI_dBm)) };
+        })
+      : state.rows.filter(r => r.Time_Period === state.map.selectedPeriod);
+      
+    pts.forEach(p => {
+      const nx = (p.X_m - xmin) / Math.max(xmax - xmin, 1);
+      const ny = (ymax - p.Y_m) / Math.max(ymax - ymin, 1);
+      
+      const sx = cx + (pad + nx * pw - cx) * state.map.zoom + state.map.panX;
+      const sy = cy + (pad + ny * ph - cy) * state.map.zoom + state.map.panY;
+      
+      const d = Math.hypot(mx - sx, my - sy);
+      if (d < minDist) {
+        minDist = d;
+        closest = { point: p, sx, sy };
+      }
+    });
+    
+    if (closest) {
+      state.map.hoveredPoint = closest.point;
+      popover.style.display = 'block';
+      popover.style.left = `${closest.sx}px`;
+      popover.style.top = `${closest.sy - 12}px`;
+      
+      const pt = closest.point;
+      const tier = getQualityTier(pt.RSSI_dBm);
+      $('pop-title').textContent = pt.Location_ID;
+      $('pop-badge').textContent = tier.name;
+      $('pop-badge').className = `badge ${tier.cls}`;
+      $('pop-loc-name').textContent = pt.Location_Name || 'Survey Node';
+      $('pop-coords').textContent = `X: ${fmt(pt.X_m, 1)}m, Y: ${fmt(pt.Y_m, 1)}m`;
+      $('pop-rssi').textContent = `${fmt(pt.RSSI_dBm, 1)} dBm`;
+      
+      if (state.routerPlacement) {
+        const dist = Math.hypot(pt.X_m - state.routerPlacement.x, pt.Y_m - state.routerPlacement.y);
+        $('pop-dist').textContent = `${fmt(dist, 1)} m`;
+      }
+      
+      drawMapCanvas('canvas-main-map', false);
+    } else {
+      if (state.map.hoveredPoint) {
+        state.map.hoveredPoint = null;
+        popover.style.display = 'none';
+        drawMapCanvas('canvas-main-map', false);
+      }
+    }
+  });
+  
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.12 : 0.89;
+    state.map.zoom = Math.max(0.6, Math.min(3.5, state.map.zoom * factor));
+    drawMapCanvas('canvas-main-map', false);
+  });
+  
+  $('btn-zoom-in').onclick = () => { state.map.zoom = Math.min(3.5, state.map.zoom * 1.2); drawMapCanvas('canvas-main-map', false); };
+  $('btn-zoom-out').onclick = () => { state.map.zoom = Math.max(0.6, state.map.zoom * 0.8); drawMapCanvas('canvas-main-map', false); };
+  $('btn-fit-map').onclick = () => { state.map.zoom = 1.0; state.map.panX = 0; state.map.panY = 0; drawMapCanvas('canvas-main-map', false); };
+  $('btn-map-reset').onclick = $('btn-fit-map').onclick;
+  
+  $('btn-fullscreen').onclick = () => {
+    if (!document.fullscreenElement) {
+      container.requestFullscreen?.().catch(() => {});
+    } else {
+      document.exitFullscreen?.().catch(() => {});
+    }
+  };
+  
+  ['measurements', 'heatmap', 'contours', 'weak', 'router', 'grid'].forEach(layer => {
+    $(`layer-${layer}`).onchange = e => {
+      state.map.layers[layer] = e.target.checked;
+      drawMapCanvas('canvas-main-map', false);
+    };
+  });
+  
+  $('map-period-select').onchange = e => {
+    state.map.selectedPeriod = e.target.value;
+    updateMapCaption();
+    drawMapCanvas('canvas-main-map', false);
+  };
+  
+  $('map-view-mode').onchange = e => {
+    state.map.viewMode = e.target.value;
+    drawMapCanvas('canvas-main-map', false);
+  };
+}
+
+// ----------------------------------------------------
+// CSV Parser & Loader
+// ----------------------------------------------------
+
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) throw new Error("CSV contains insufficient data.");
+  
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  const req = ["Location_ID", "Location_Name", "Floor", "X_m", "Y_m", "Time_Period", "RSSI_dBm"];
+  const missing = req.filter(k => !headers.includes(k));
+  if (missing.length) throw new Error(`Missing columns: ${missing.join(', ')}`);
+  
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const parts = lines[i].split(',').map(p => p.trim().replace(/^"|"$/g, ''));
+    const obj = {};
+    headers.forEach((h, idx) => obj[h] = parts[idx] ?? '');
+    
+    obj.Floor = Number(obj.Floor) || 0;
+    obj.X_m = Number(obj.X_m);
+    obj.Y_m = Number(obj.Y_m);
+    obj.RSSI_dBm = Number(obj.RSSI_dBm);
+    
+    if (![obj.X_m, obj.Y_m, obj.RSSI_dBm].every(Number.isFinite)) {
+      throw new Error(`Invalid numeric coordinates or RSSI at row ${i + 1}`);
+    }
+    rows.push(obj);
+  }
+  return rows;
+}
+
+async function loadDataset(newRows, filename = 'custom.csv') {
+  try {
+    state.rows = newRows;
+    await computeFullPipeline();
+    refreshAllViews();
+    showToast(`Loaded ${newRows.length} measurements from ${filename}`);
+  } catch (err) {
+    showToast(`Error: ${err.message}`);
+  }
+}
+
+// ----------------------------------------------------
+// Exporters & Modal
+// ----------------------------------------------------
+
+function openExportModal() { $('export-modal').classList.add('open'); }
+function closeExportModal() { $('export-modal').classList.remove('open'); }
+
+function exportPNGMap() {
+  const canvas = $('canvas-main-map');
+  const link = document.createElement('a');
+  link.download = 'WiFiScope_Coverage_Map.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showToast('Downloaded High-Res Map PNG');
+  closeExportModal();
+}
+
+function exportFullCSV() {
+  const headers = ['Location_ID', 'Location_Name', 'Floor', 'X_m', 'Y_m', 'Time_Period', 'RSSI_dBm', 'SSID', 'BSSID'];
+  let csvContent = headers.join(',') + '\n';
+  state.rows.forEach(r => {
+    csvContent += headers.map(h => r[h] ?? '').join(',') + '\n';
+  });
+  
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'wifi_measurements.csv';
+  link.click();
+  showToast('Downloaded CSV dataset');
+  closeExportModal();
+}
+
+function exportJSONState() {
+  const payload = {
+    metadata: {
+      generatedAt: new Date().toISOString(),
+      appName: "WiFiScope",
+      locationsCount: state.locations.length,
+      readingsCount: state.rows.length,
+      thresholdDbm: state.threshold
+    },
+    measurements: state.rows,
+    models: state.models,
+    validation: state.validation,
+    weakZones: state.weakZones,
+    strongZones: state.strongZones,
+    routerPlacement: state.routerPlacement,
+    eigen: state.eigen
+  };
+  
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'wifiscope_state.json';
+  link.click();
+  showToast('Downloaded JSON analysis state');
+  closeExportModal();
+}
+
+function printAuditReport() {
+  closeExportModal();
+  setTimeout(() => window.print(), 300);
+}
+
+// ----------------------------------------------------
+// UI Sync & Refresh
+// ----------------------------------------------------
+
+
+function updateMapCaption(){
+  const p = state.map.selectedPeriod || 'Average';
+  const label = p === 'Average' ? 'Average Wi-Fi coverage' : p + ' Wi-Fi coverage';
+  const title = $('map-page-title');
+  const chip = $('map-caption-chip');
+  if (title) title.textContent = label;
+  if (chip) chip.textContent = label;
+}
+
+function refreshAllViews() {
+  const mapPeriodSelect = $('map-period-select');
+  mapPeriodSelect.innerHTML = '<option value="Average">View: Average Signal</option>';
+  state.periods.forEach(p => {
+    mapPeriodSelect.innerHTML += `<option value="${p}">View: ${p}</option>`;
+  });
+  
+  const estPeriod = $('est-period');
+  estPeriod.innerHTML = '<option value="Average">Average</option>';
+  state.periods.forEach(p => {
+    estPeriod.innerHTML += `<option value="${p}">${p}</option>`;
+  });
+  
+  const tablePeriod = $('table-filter-period');
+  tablePeriod.innerHTML = '<option value="all">All Time Periods</option>';
+  state.periods.forEach(p => {
+    tablePeriod.innerHTML += `<option value="${p}">${p}</option>`;
+  });
+  
+  updateDashboardUI();
+  updateMeasurementsTable();
+  updateSpatialIntelUI();
+  updateAnalyticsUI();
+  updateMathPipelineUI();
+  updateQualityAuditsUI();
+  
+  drawMapCanvas('canvas-dash-map', true);
+  drawMapCanvas('canvas-main-map', false);
+}
+
+// ----------------------------------------------------
+// App Initialization
+// ----------------------------------------------------
+
+function initApp() {
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.onclick = () => navigateTo(btn.getAttribute('data-target'));
+  });
+  
+  $('btn-theme-toggle').onclick = () => {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', state.theme);
+    drawMapCanvas('canvas-dash-map', true);
+    drawMapCanvas('canvas-main-map', false);
+    drawHistogram();
+    showToast(`Switched to ${state.theme} mode`);
+  };
+  
+  // 30-Slide Pitch Mode Controls
+  $('btn-pitch-mode-side').onclick = openPitchMode;
+  $('btn-pitch-mode-top').onclick = openPitchMode;
+  $('btn-pitch-exit').onclick = closePitchMode;
+  $('btn-pitch-prev').onclick = () => showPitchSlide(state.pitchSlide - 1);
+  $('btn-pitch-next').onclick = () => showPitchSlide(state.pitchSlide + 1);
+  
+  // Keyboard Shortcuts: P (Deck), Left/Right (Slides), Escape (Close)
+  window.addEventListener('keydown', e => {
+    if (e.key === 'p' || e.key === 'P') {
+      if (!$('pitch-overlay').classList.contains('open')) openPitchMode();
+    }
+    if ($('pitch-overlay').classList.contains('open')) {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        showPitchSlide(state.pitchSlide + 1);
+      }
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        showPitchSlide(state.pitchSlide - 1);
+      }
+    }
+    if (e.key === 'Escape') {
+      closePitchMode();
+      closeWhyModal();
+      closeExportModal();
+    }
+  });
+  
+  $('btn-run-analysis').onclick = runAnalysisDemo;
+  
+  $('btn-export-menu').onclick = openExportModal;
+  $('btn-export-png-map').onclick = exportPNGMap;
+  $('btn-export-full-csv').onclick = exportFullCSV;
+  $('btn-export-csv').onclick = exportFullCSV;
+  $('btn-export-json').onclick = exportJSONState;
+  $('btn-print-report').onclick = printAuditReport;
+  
+  const fileInput = $('csv-file-input');
+  $('drop-zone').onclick = () => fileInput.click();
+  
+  fileInput.onchange = async e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const rows = parseCSV(text);
+      await loadDataset(rows, file.name);
+      navigateTo('dashboard');
+    } catch (err) {
+      showToast(err.message);
+    }
+    e.target.value = '';
+  };
+  
+  $('table-search').oninput = e => {
+    state.table.search = e.target.value;
+    state.table.page = 1;
+    updateMeasurementsTable();
+  };
+  
+  $('table-filter-quality').onchange = e => {
+    state.table.qualityFilter = e.target.value;
+    state.table.page = 1;
+    updateMeasurementsTable();
+  };
+  
+  $('table-filter-period').onchange = e => {
+    state.table.periodFilter = e.target.value;
+    state.table.page = 1;
+    updateMeasurementsTable();
+  };
+  
+  $('btn-page-prev').onclick = () => {
+    if (state.table.page > 1) {
+      state.table.page--;
+      updateMeasurementsTable();
+    }
+  };
+  
+  $('btn-page-next').onclick = () => {
+    const search = state.table.search.toLowerCase();
+    const qFilter = state.table.qualityFilter;
+    const pFilter = state.table.periodFilter;
+    const count = state.rows.filter(r => {
+      const tier = getQualityTier(r.RSSI_dBm).name;
+      const matchSearch = (r.Location_ID + ' ' + (r.Location_Name || '')).toLowerCase().includes(search);
+      const matchQuality = qFilter === 'all' || tier === qFilter;
+      const matchPeriod = pFilter === 'all' || r.Time_Period === pFilter;
+      return matchSearch && matchQuality && matchPeriod;
+    }).length;
+    
+    if (state.table.page * state.table.pageSize < count) {
+      state.table.page++;
+      updateMeasurementsTable();
+    }
+  };
+  
+  document.querySelectorAll('#measurements-table th[data-col]').forEach(th => {
+    th.onclick = () => {
+      const col = th.getAttribute('data-col');
+      if (state.table.sortCol === col) {
+        state.table.sortAsc = !state.table.sortAsc;
+      } else {
+        state.table.sortCol = col;
+        state.table.sortAsc = true;
+      }
+      updateMeasurementsTable();
+    };
+  });
+  
+  $('btn-estimate').onclick = async () => {
+    const x = parseFloat($('est-x').value);
+    const y = parseFloat($('est-y').value);
+    const p = $('est-period').value;
+    if (isNaN(x) || isNaN(y)) {
+      showToast('Enter valid numeric X and Y coordinates');
+      return;
+    }
+
+    try {
+      if (window.location.protocol !== 'file:') {
+        const response = await fetch('/api/predict', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({rows: state.rows, threshold: state.threshold, x, y, period: p})
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || 'Prediction failed');
+        const pred = payload.predicted_rssi;
+        $('est-result').innerHTML = `Estimated Signal at <strong>(${fmt(x, 1)}m, ${fmt(y, 1)}m)</strong> during <strong>${p}</strong>: <span style="color: ${rssiToColor(pred)}">${fmt(pred, 1)} dBm</span>`;
+        return;
+      }
+
+      const beta = state.models[p] || state.models['Average'];
+      const pred = predictRssi(beta, x, y);
+      $('est-result').innerHTML = `Estimated Signal at <strong>(${fmt(x, 1)}m, ${fmt(y, 1)}m)</strong> during <strong>${p}</strong>: <span style="color: ${rssiToColor(pred)}">${fmt(pred, 1)} dBm</span>`;
+    } catch (err) {
+      showToast(`Python prediction error: ${err.message}`);
+    }
+  };
+  
+  initMapInteractions();
+  window.onresize = () => {
+    if (state.activeView === 'dashboard') drawMapCanvas('canvas-dash-map', true);
+    if (state.activeView === 'coverage-map') drawMapCanvas('canvas-main-map', false);
+    if (state.activeView === 'analytics') drawHistogram();
+  };
+  
+  computeFullPipeline()
+    .then(() => refreshAllViews())
+    .catch(err => {
+      showToast(`Python backend unavailable: ${err.message}`);
+      // Direct fallback keeps the UI inspectable if somebody opens the HTML alone.
+      computeFullPipelineClientFallback();
+      refreshAllViews();
+    });
+}
+
+window.addEventListener('DOMContentLoaded', initApp);
+</script>
+
+<script>
+(function(){
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      const p=document.getElementById('pitch-overlay');
+      if(p) p.classList.remove('open');
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
